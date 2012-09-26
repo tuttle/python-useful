@@ -61,7 +61,7 @@ class EmailLoginModelBackend(ModelBackend):
         return user if user and user.check_password(password) else None
 
 
-class UsernameOrEmailLoginModelBackend(ModelBackend):
+class UsernameOrEmailLoginModelBackend(EmailLoginModelBackend):
     """
     Tries to identify the given login-name as username or email
     (both case-insensitive by default).
