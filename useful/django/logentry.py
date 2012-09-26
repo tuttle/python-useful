@@ -55,8 +55,8 @@ class UILogEntry(object):
             lst = get_text_list(form.changed_data, _('and'))
             change_message.append(_('Changed %s.') % lst)
 
-        change_message = ' '.join(change_message)
-        return change_message or _('No fields changed.')
+        change_message = u' '.join(change_message)
+        return unicode(change_message or _('No fields changed.'))
 
     def do_log(self, object, action_flag, message):
         LogEntry.objects.log_action(
