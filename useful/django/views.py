@@ -1,4 +1,5 @@
 import os
+import time
 import functools
 
 from django.conf import settings
@@ -90,3 +91,30 @@ def protected_redirect(request):
 </body></html>''' % (u, u, u, u))
     else:
         return HttpResponseBadRequest("Bad parameters or protection fault.")
+
+
+def serve_with_Expires(request, path, cache_timeout=365*24*60*60):
+    """
+    This view can be used in the development server to add the Expires
+    header on the static files protected by the modtime change detection
+    in the freshstatic template tag (see there).
+
+    The browsers will stop asking for the file again and again during the
+    normal browsing.
+
+    Example in your urls.py::
+
+        urlpatterns += static.static(settings.STATIC_URL, serve_with_Expires)
+
+    By adding a cache_timeout parameter to the above call with the number
+    of seconds you will change the deafult expiration of 1 year.
+    """
+    from django.utils.http import http_date
+    from django.contrib.staticfiles.views import serve
+
+    response = serve(request, path)
+
+    if not response.has_header('Expires'):
+        response['Expires'] = http_date(time.time() + cache_timeout)
+
+    return response
