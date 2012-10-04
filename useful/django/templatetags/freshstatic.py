@@ -4,6 +4,7 @@ import posixpath
 import urllib
 
 from django import template
+from django.conf import settings
 from django.contrib.staticfiles import finders, storage
 
 register = template.Library()
@@ -39,9 +40,13 @@ def freshstatic(path):
         # Get the real file abs path and its timestamp.
         normalized_path = posixpath.normpath(urllib.unquote(path)).lstrip('/')
         absolute_path = finders.find(normalized_path)
+
         if absolute_path:
             modtime = os.stat(absolute_path)[stat.ST_MTIME]
             url += '?%d' % modtime
+
+        elif not getattr(settings, 'FRESHSTATIC_CAN_BE_MISSING', None):
+            raise RuntimeError("Static file %s not found." % path)
 
         STATIC_URL_CACHE[path] = url
 
