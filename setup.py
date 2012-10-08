@@ -9,5 +9,5 @@ setup(name='useful',
       description = "Everyday use utilities for writing Python/Django apps",
       author = "Vlada Macek",
       author_email = "macek@sandbox.cz",
-      url = "https://github.com/tuttle/useful",
+      url = "https://github.com/tuttle/python-useful",
 )

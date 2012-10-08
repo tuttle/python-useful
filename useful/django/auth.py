@@ -5,6 +5,7 @@ from .getters import get_object_or_none
 from django.contrib.auth.backends import ModelBackend
 from django.contrib.auth.models import User
 from django.core.validators import validate_email, ValidationError
+from django.utils.crypto import get_random_string
 
 
 def get_random_password(size=7, cadre='abcdehkmnprstuvxyz2345678923456789'):
@@ -12,8 +13,7 @@ def get_random_password(size=7, cadre='abcdehkmnprstuvxyz2345678923456789'):
     Returns the password composed of the easily readable letters and digits
     by default (digits doubled to increase the occurrence).
     """
-    random.seed()
-    return ''.join(random.choice(cadre) for unused_i in xrange(size))
+    return get_random_string(size, cadre)
 
 
 def get_unique_username(username):
