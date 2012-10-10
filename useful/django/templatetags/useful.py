@@ -10,6 +10,20 @@ from django.utils.html import urlize
 register = template.Library()
 
 
+@register.simple_tag
+def querydict_set(querydict, param_name, param_value):
+    """
+    Adds/replaces specific parameter in the querydict.
+    For example see the docstring for useful.django.views.paginate.
+    """
+    # Make it mutable.
+    querydict = querydict.copy()
+    # Set the value.
+    querydict[param_name] = param_value
+    # Encode into the query string.
+    return querydict.urlencode()
+
+
 @register.filter
 def get(mapping, key):
     """

@@ -1,5 +1,3 @@
-import random
-
 from .getters import get_object_or_none
 
 from django.contrib.auth.backends import ModelBackend
