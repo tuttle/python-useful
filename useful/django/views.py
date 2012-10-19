@@ -127,7 +127,7 @@ def paginate(request, objects, per_page=20):
     Can be used like this in the template::
 
         {% load i18n useful %}
-        <div class="pager">
+        <div class="paginate">
             <ul>
                 {% if objs.has_previous %}
                 <li class="first"><a href="?{% querydict_set request.GET 'page' 1 %}" title="{% trans "First page" %}">&lt;&lt;</a></li>

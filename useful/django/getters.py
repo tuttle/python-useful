@@ -1,30 +1,58 @@
 from collections import defaultdict
 
 from django.db import connection
-from django.shortcuts import get_object_or_404
-from django.http import Http404
+from django.db.models.manager import Manager
+from django.db.models.query import QuerySet
 
 
-def get_object_or_none(klass, **kwargs):
+def _get_queryset(klass):
     """
-    Gets the object of the model/manager/queryset by kwargs.
-    None if not found.
+    Returns a QuerySet from a Model, Manager, or QuerySet.
+
+    NoDRY: Function copied from __init__ in django.shortcuts to assure stability.
     """
+    if isinstance(klass, QuerySet):
+        return klass
+    elif isinstance(klass, Manager):
+        manager = klass
+    else:
+        manager = klass._default_manager
+    return manager.all()
+
+
+def get_object_or_none(klass, *args, **kwargs):
+    """
+    Uses get() to return an object, or None if the object does not exist.
+
+    klass may be a Model, Manager, or QuerySet object. All other passed
+    arguments and keyword arguments are used in the get() query.
+
+    Note: Like with get(), an MultipleObjectsReturned will be raised if more than one
+    object is found.
+    """
+    queryset = _get_queryset(klass)
     try:
-        return get_object_or_404(klass, **kwargs)
-    except Http404:
+        return queryset.get(*args, **kwargs)
+    except queryset.model.DoesNotExist:
         return None
 
 
-def get_object_or_new(klass, **kwargs):
+def get_object_or_new(klass, *args, **kwargs):
     """
-    Gets the object of the model/manager/queryset by kwargs.
-    Creates new using the keywords, but does not save it.
+    Uses get() to return an object. If it does not exist, a new UNSAVED
+    object of the given model is returned.
+
+    klass may be a Model, Manager, or QuerySet object. All other passed
+    arguments and keyword arguments are used in the get() query.
+
+    Note: Like with get(), an MultipleObjectsReturned will be raised if more than one
+    object is found.
     """
+    queryset = _get_queryset(klass)
     try:
-        return get_object_or_404(klass, **kwargs)
-    except Http404:
-        return klass(**kwargs)
+        return queryset.get(*args, **kwargs)
+    except queryset.model.DoesNotExist:
+        return queryset.model(*args, **kwargs)
 
 
 def prefetch_m2m(m2m_field):
