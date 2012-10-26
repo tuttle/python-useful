@@ -56,15 +56,15 @@ def install_termination_logging_signal_handlers():
                 pass
 
 
-def init_syslog(log_level_name, process_ident):
+def init_syslog(level, process_ident, address='/dev/log', facility='daemon'):
     """
     Set the root logger to be directed to syslog from the given level
     and with given ident string (which will get prepended to every message).
     """
-    logging.root.setLevel(logging.getLevelName(log_level_name))
+    logging.root.setLevel(level)
     if len(logging.root.handlers) == 0:
         fmt = '%s %%(levelname)s: %%(message)s' % process_ident
-        hdlr = logging.handlers.SysLogHandler(address='/dev/log')
+        hdlr = logging.handlers.SysLogHandler(address, facility)
         hdlr.setFormatter(logging.Formatter(fmt))
         logging.root.addHandler(hdlr)
 
