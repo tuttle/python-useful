@@ -16,7 +16,7 @@ class UILogEntry(object):
         doing the change as argument. When not given, 'admin' is used.
         """
         if user is None:
-            user = User.objects.get(username='admin').only('id')
+            user = User.objects.only('id').get(username='admin')
         self.user = user
 
     def log_addition(self, object, message='UI'):
