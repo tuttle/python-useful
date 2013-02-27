@@ -9,17 +9,24 @@ from django.utils.html import urlize
 
 register = template.Library()
 
-
 @register.simple_tag
 def querydict_set(querydict, param_name, param_value):
     """
-    Adds/replaces specific parameter in the querydict.
-    For example see the docstring for useful.django.views.paginate.
+    Adds/replaces/deletes specific parameter in the querydict.
+
+    Usage example::
+
+        <a href="?{% querydict_set request.GET 'order' 'code' %}">
     """
     # Make it mutable.
     querydict = querydict.copy()
-    # Set the value.
-    querydict[param_name] = param_value
+
+    # Set or delete the value.
+    if force_unicode(param_value):
+        querydict[param_name] = param_value
+    else:
+        querydict.pop(param_name, None)
+
     # Encode into the query string.
     return querydict.urlencode()
 

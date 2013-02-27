@@ -1,7 +1,7 @@
 import hashlib
 
 from django import forms
-from django.utils.translation import ugettext as _
+from django.utils.translation import ugettext_lazy as _
 from django.utils.safestring import mark_safe
 from django.utils.encoding import smart_unicode
 from django.utils.crypto import salted_hmac, constant_time_compare
@@ -22,7 +22,7 @@ def _clean_object_version(slf):
             return                    # newly created object, nothing to check
         else:
             slf.concurrency_problem = _("In the mean time, someone "
-                "<b>created</b> the item in the database.") + ' ' + RELOAD_MSG
+                "<b>created</b> the item in the database.") + ' ' + unicode(RELOAD_MSG)
     else:
         if pk is None:
             slf.concurrency_problem = _("Please note: In the mean time, "
@@ -39,7 +39,7 @@ def _clean_object_version(slf):
         db_hash = _gen_object_hash(db_obj)
         if form_hash != db_hash:
             slf.concurrency_problem = _("In the mean time, someone "
-                "<b>changed</b> this item in the database.") + ' ' + RELOAD_MSG
+                "<b>changed</b> this item in the database.") + ' ' + unicode(RELOAD_MSG)
 
 #            try:
 #                modified = db_obj.modified.strftime('%Y-%m-%d %H:%M:%S')
@@ -54,7 +54,7 @@ def _clean_object_version(slf):
         errors.append(mark_safe(slf.concurrency_problem))
 
 
-RELOAD_MSG = _("Please <a href="">RELOAD</a> and edit again.<br />"
+RELOAD_MSG = _("Please <a href=''>RELOAD</a> and edit again.<br />"
                "<b>WARNING:</b> Your changes are almost LOST now and can't be"
                " saved.<br />But you still have a chance to copy them out.")
 
