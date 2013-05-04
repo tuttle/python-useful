@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-02-27 13:46+0100\n"
-"PO-Revision-Date: 2013-02-27 13:40+0100\n"
+"POT-Creation-Date: 2013-05-04 15:49+0200\n"
+"PO-Revision-Date: 2013-05-04 15:48+0100\n"
 "Last-Translator: Vlada Macek <macek@sandbox.cz>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -50,30 +50,30 @@ msgstr ""
 msgid "Version protection tampered."
 msgstr "Zásah do ochrany verzí."
 
-#: logentry.py:55
+#: logentry.py:56
 msgid "and"
 msgstr "a"
 
-#: logentry.py:56
+#: logentry.py:57
 #, python-format
 msgid "Changed %s."
 msgstr "Změněno %s."
 
-#: logentry.py:59
+#: logentry.py:60
 msgid "No fields changed."
 msgstr "Nebyla změněna žádná pole."
 
-#: logentry.py:110
+#: logentry.py:111
 msgid "Action time"
 msgstr "Čas akce"
 
-#: logentry.py:117
+#: logentry.py:118
 msgid "Table"
 msgstr "Tabulka"
 
-#: logentry.py:125
-msgid "Action"
-msgstr "Akce"
+#: logentry.py:126
+msgid "Action, object"
+msgstr "Akce, objekt"
 
 #: readonly_admin.py:38
 msgid "Created"
@@ -82,3 +82,6 @@ msgstr "Vytvořeno"
 #: readonly_admin.py:44
 msgid "Entered"
 msgstr "Vloženo"
+
+#~ msgid "Action"
+#~ msgstr "Akce"

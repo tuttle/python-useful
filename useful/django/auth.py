@@ -1,9 +1,16 @@
 from .getters import get_object_or_none
 
 from django.contrib.auth.backends import ModelBackend
-from django.contrib.auth.models import User
 from django.core.validators import validate_email, ValidationError
 from django.utils.crypto import get_random_string
+
+
+# Django 1.5 swappable model support
+try:
+    from django.contrib.auth import get_user_model
+    UserModel = get_user_model()
+except ImportError:
+    from django.contrib.auth.models import User as UserModel
 
 
 def get_random_password(size=7, cadre='abcdehkmnprstuvxyz2345678923456789'):
@@ -17,15 +24,15 @@ def get_random_password(size=7, cadre='abcdehkmnprstuvxyz2345678923456789'):
 def get_unique_username(username):
     """
     Returns the first available username with appended numbering
-    (started from 2) that is not yet present in the User table.
+    (started from 2) that is not yet present in the UserModel table.
     """
     assert username
     base = username
     idx = 2
     while True:
         try:
-            User.objects.get(username=username)
-        except User.DoesNotExist:
+            UserModel.objects.get(username=username)
+        except UserModel.DoesNotExist:
             break
         username = '%s%d' % (base, idx)
         idx += 1
@@ -46,10 +53,10 @@ class EmailLoginModelBackend(ModelBackend):
         try:
             validate_email(email)
             if self.EMAIL_CASE_SENSITIVE:
-                user = User.objects.get(email__exact=email)
+                user = UserModel.objects.get(email__exact=email)
             else:
-                user = User.objects.get(email__iexact=email)
-        except (User.DoesNotExist, ValidationError):
+                user = UserModel.objects.get(email__iexact=email)
+        except (UserModel.DoesNotExist, ValidationError):
             user = None
 
         return user
@@ -71,9 +78,9 @@ class UsernameOrEmailLoginModelBackend(EmailLoginModelBackend):
 
     def authenticate(self, username=None, password=None):
         if self.USERNAME_CASE_SENSITIVE:
-            user = get_object_or_none(User, username__exact=username)
+            user = get_object_or_none(UserModel, username__exact=username)
         else:
-            user = get_object_or_none(User, username__iexact=username)
+            user = get_object_or_none(UserModel, username__iexact=username)
 
         if user is None:
             user = self.get_user_by_email(username)

@@ -3,11 +3,12 @@ from django.utils.text import get_text_list
 from django.utils.encoding import force_unicode
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.admin.models import LogEntry, ADDITION, CHANGE, DELETION
-from django.contrib.auth.models import User
 from django.contrib import admin
 from django.template.defaultfilters import capfirst
 
 from .readonly_admin import ReadOnlyModelAdmin
+from .auth import UserModel
+
 
 class UILogEntry(object):
     def __init__(self, user=None):
@@ -16,7 +17,7 @@ class UILogEntry(object):
         doing the change as argument. When not given, 'admin' is used.
         """
         if user is None:
-            user = User.objects.only('id').get(username='admin')
+            user = UserModel.objects.only('id').get(username='admin')  # @UndefinedVariable
         self.user = user
 
     def log_addition(self, object, message='UI'):
@@ -122,7 +123,7 @@ class LogEntryAdmin(ReadOnlyModelAdmin):
             r = '<a href="/admyn/%s">%s</a>' % (obj.get_admin_url(), r)
         return '<span class="%s">%s</span>' % (CHTYPES[obj.action_flag], r)
     action.allow_tags = True
-    action.short_description = _("Action")
+    action.short_description = _("Action, object")
 
     def queryset(self, request):
         qs = super(LogEntryAdmin, self).queryset(request)

@@ -1,5 +1,6 @@
 # Based on commit 111397cd41db41b2acec84473649b6f291a9c272 of
 # https://github.com/ui/django-cached_authentication_middleware/
+# Replaced User with UserModel to support the Django 1.5 swappable model.
 
 """
 Copyright (c) 2012 Selwin Ong
@@ -31,11 +32,11 @@ from django.db import models
 from django.db.models.signals import post_save, post_delete
 from django.utils.functional import SimpleLazyObject
 
-from django.contrib.auth.models import AnonymousUser, User
+from django.contrib.auth.models import AnonymousUser
 
+from .auth import UserModel
 
-CACHE_KEY = 'cached_auth_middleware:%s'
-
+CACHE_KEY = 'cached_auth_middleware_1.5:%s'
 
 try:
     app_label, model_name = settings.AUTH_PROFILE_MODULE.split('.')
@@ -45,7 +46,7 @@ except (ValueError, AttributeError):
 
 
 def invalidate_cache(sender, instance, **kwargs):  # @UnusedVariable
-    if isinstance(instance, User):
+    if isinstance(instance, UserModel):
         key = CACHE_KEY % instance.id
     else:
         key = CACHE_KEY % instance.user_id
@@ -86,8 +87,8 @@ class CachedAuthenticationMiddleware(object):
     'useful.django.cached_auth.CachedAuthenticationMiddleware'.
     """
     def __init__(self):
-        post_save.connect(invalidate_cache, sender=User)
-        post_delete.connect(invalidate_cache, sender=User)
+        post_save.connect(invalidate_cache, sender=UserModel)
+        post_delete.connect(invalidate_cache, sender=UserModel)
         if profile_model:
             post_save.connect(invalidate_cache, sender=profile_model)
             post_delete.connect(invalidate_cache, sender=profile_model)
