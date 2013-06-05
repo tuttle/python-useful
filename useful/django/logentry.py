@@ -75,12 +75,14 @@ class UILogEntry(object):
         """
         existed = form.instance.id
 
-        form.save()
+        instance = form.save()
 
         if existed:
             self.log_change(form.instance, form=form)
         else:
             self.log_addition(form.instance)
+
+        return instance
 
 
 CHTYPES = {admin.models.ADDITION: 'addlink',
