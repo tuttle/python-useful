@@ -48,6 +48,8 @@ def freshstatic(path):
         elif not getattr(settings, 'FRESHSTATIC_CAN_BE_MISSING', None):
             raise RuntimeError("Static file %s not found." % path)
 
-        STATIC_URL_CACHE[path] = url
+        if not settings.DEBUG:
+            # Save to cache (only when not developing).
+            STATIC_URL_CACHE[path] = url
 
     return url
