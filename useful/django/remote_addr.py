@@ -1,26 +1,33 @@
-# This is the copy of middleware removed from Django 1.1 for security
-# concerns.  But if one knows what one is doing...
+from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
 
-class SetRemoteAddrFromForwardedFor(object):
+
+class SetRemoteAddrMiddleware(object):
     """
-    Middleware that sets REMOTE_ADDR based on HTTP_X_FORWARDED_FOR, if the
-    latter is set. This is useful if you're sitting behind a reverse proxy that
-    causes each request's REMOTE_ADDR to be set to 127.0.0.1.
+    Request middleware that sets REMOTE_ADDR based on request.META variable
+    pointed by settings.REAL_IP_META_VARIABLE_NAME.
 
-    Note that this does NOT validate HTTP_X_FORWARDED_FOR. If you're not behind
-    a reverse proxy that sets HTTP_X_FORWARDED_FOR automatically, do not use
-    this middleware. Anybody can spoof the value of HTTP_X_FORWARDED_FOR, and
-    because this sets REMOTE_ADDR based on HTTP_X_FORWARDED_FOR, that means
-    anybody can "fake" their IP address. Only use this when you can absolutely
-    trust the value of HTTP_X_FORWARDED_FOR.
+    This is intentionally a required setting, although if it is None,
+    the feature is disabled. That's useful for local development.
+
+    In production use, for example if nginx is your reverse proxy, you can
+    configure it like this::
+
+        proxy_set_header   X-Real-IP        $remote_addr;
+
+    and if you set Django like this::
+
+        REAL_IP_META_VARIABLE_NAME = 'HTTP_X_REAL_IP'
+
+    then will get the real remote IP address to REMOTE_ADDR.
     """
     def process_request(self, request):
         try:
-            real_ip = request.META['HTTP_X_FORWARDED_FOR']
-        except KeyError:
-            return None
-        else:
-            # HTTP_X_FORWARDED_FOR can be a comma-separated list of IPs. The
-            # client's IP will be the first one.
-            real_ip = real_ip.split(",")[0].strip()
-            request.META['REMOTE_ADDR'] = real_ip
+            real_ip_varname = settings.REAL_IP_META_VARIABLE_NAME
+        except AttributeError:
+            raise ImproperlyConfigured("%s: Missing the required setting "
+                                       "REAL_IP_META_VARIABLE_NAME."
+                                       % self.__class__.__name__)
+
+        if real_ip_varname is not None:
+            request.META['REMOTE_ADDR'] = request.META[real_ip_varname]
