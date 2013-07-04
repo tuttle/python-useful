@@ -8,9 +8,10 @@ from django.utils.crypto import get_random_string
 # Django 1.5 swappable model support
 try:
     from django.contrib.auth import get_user_model
-    UserModel = get_user_model()
 except ImportError:
     from django.contrib.auth.models import User as UserModel
+else:
+    UserModel = get_user_model()
 
 
 def get_random_password(size=7, cadre='abcdehkmnprstuvxyz2345678923456789'):
