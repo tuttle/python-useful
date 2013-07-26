@@ -6,8 +6,15 @@ from django.contrib.admin.models import LogEntry, ADDITION, CHANGE, DELETION
 from django.contrib import admin
 from django.template.defaultfilters import capfirst
 
+# Django 1.5 swappable model support, backward compatible.
+try:
+    from django.contrib.auth import get_user_model
+except ImportError:
+    from django.contrib.auth.models import User as UserModel
+else:
+    UserModel = get_user_model()
+
 from .readonly_admin import ReadOnlyModelAdmin
-from .auth import UserModel
 
 
 class UILogEntry(object):
@@ -17,7 +24,7 @@ class UILogEntry(object):
         doing the change as argument. When not given, 'admin' is used.
         """
         if user is None:
-            user = UserModel.objects.only('id').get(username='admin')  # @UndefinedVariable
+            user = UserModel.objects.only('id').get(username='admin')
         self.user = user
 
     def log_addition(self, object, message='UI'):

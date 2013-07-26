@@ -32,9 +32,13 @@ from django.db import models
 from django.db.models.signals import post_save, post_delete
 from django.utils.functional import SimpleLazyObject
 
-from django.contrib.auth.models import AnonymousUser
-
-from .auth import UserModel
+# Django 1.5 swappable model support, backward compatible.
+try:
+    from django.contrib.auth import get_user_model
+except ImportError:
+    from django.contrib.auth.models import User as UserModel
+else:
+    UserModel = get_user_model()
 
 CACHE_KEY = 'cached_auth_middleware_1.5:%s'
 
@@ -54,6 +58,8 @@ def invalidate_cache(sender, instance, **kwargs):  # @UnusedVariable
 
 
 def get_cached_user(request):
+    from django.contrib.auth.models import AnonymousUser
+
     if not hasattr(request, '_cached_user'):
         try:
             key = CACHE_KEY % request.session[SESSION_KEY]

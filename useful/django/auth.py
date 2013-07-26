@@ -4,8 +4,7 @@ from django.contrib.auth.backends import ModelBackend
 from django.core.validators import validate_email, ValidationError
 from django.utils.crypto import get_random_string
 
-
-# Django 1.5 swappable model support
+# Django 1.5 swappable model support, backward compatible.
 try:
     from django.contrib.auth import get_user_model
 except ImportError:
