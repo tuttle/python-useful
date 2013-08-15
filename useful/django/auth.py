@@ -30,9 +30,7 @@ def get_unique_username(username):
     base = username
     idx = 2
     while True:
-        try:
-            UserModel.objects.get(username=username)
-        except UserModel.DoesNotExist:
+        if not UserModel.objects.filter(username=username).exists():
             break
         username = '%s%d' % (base, idx)
         idx += 1
