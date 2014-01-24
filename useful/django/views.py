@@ -4,11 +4,29 @@ import functools
 
 from django.conf import settings
 from django.core.paginator import Paginator, EmptyPage, InvalidPage
+from django.core.urlresolvers import reverse
 from django.shortcuts import render_to_response
-from django.http import HttpResponse, HttpResponseBadRequest
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest
 from django.template import RequestContext
 
 from .crypto import SecretTokenGenerator
+
+
+class HttpResponseException(Exception):
+    """
+    An abstract exception allowing any kind of exception under page decorator to be converted
+    to a HttpResponse<Anything>.
+    Don't raise this directly, but subclass and raise with http_response attribute.
+    """
+
+
+class ReverseAndRedirect(HttpResponseException):
+    """
+    A shortcut allowing to do a reverse, then redirect the user by raising an exception.
+    """
+    def __init__(self, viewname, *args, **kwargs):
+        url = reverse(viewname, args=args, kwargs=kwargs)
+        self.http_response = HttpResponseRedirect(url)
 
 
 def page(template=None, **decorator_args):
@@ -27,8 +45,11 @@ def page(template=None, **decorator_args):
             # Take the basic context dictionary from the optional decorator args.
             data = decorator_args.copy()
 
-            # Call the original view.
-            d = fn(request, *args, **kw)
+            try:
+                # Call the original view.
+                d = fn(request, *args, **kw)
+            except HttpResponseException, e:
+                return e.http_response
 
             # Return now if it returned some kind of HTTP response itself, no job.
             if isinstance(d, HttpResponse):
@@ -81,13 +102,16 @@ def protected_redirect(request):
     was clicked: The target site will get the redirector URL as referrer.
     """
     u, t = request.GET.get('u'), request.GET.get('t')
+
     if u and t and SecretTokenGenerator().check_token(u, t):
+        u = ('http://' + u) if '://' not in u else u
+
         return HttpResponse('''<html><head>
-<meta http-equiv="refresh" content="1;url=http://%s">
+<meta http-equiv="refresh" content="1;url=%s">
 </head>
 <body>
-    <a href="http://%s">Redirecting to %s</a>
-    <script>window.location.replace("http://%s");
+    <a href="%s">Redirecting to %s</a>
+    <script>window.location.replace("%s");
     </script>
 </body></html>''' % (u, u, u, u))
     else:
