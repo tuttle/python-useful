@@ -8,55 +8,50 @@ from django.utils.crypto import salted_hmac, constant_time_compare
 from django.contrib import admin
 from django.contrib.auth.forms import UserChangeForm
 
-# form_pk ---   pk ---    : no problem
-# form_pk ---   pk val    : fail as an obj is already in db
-# form_pk val   pk ---    : warn about removal
-# form_pk val   pk val    : compare (bogus is mismatch)
+
+CONCURRENCY_EDIT_MESSAGE = _("<br><b>WARNING:</b> Your changes are almost LOST now and can't be "
+                             "saved.<br><em>But you still can copy the values out manually "
+                             "now.</em><br>Then you can <a href=''>RELOAD</a> and edit again.")
+
 
 def _clean_object_version(slf):
     form_pk, form_hash = _validate_object_version(slf.cleaned_data)
 
+    # form_pk ---  &&  pk ---    : ok, unsaved object
+    # form_pk ---  &&  pk val    : fail as object_version is missing
+    # form_pk val  &&  pk ---    : warn about removal
+    # form_pk val  &&  pk val    : compare (validation error if mismatch)
+
     pk = slf.instance.pk
+
     if form_pk is None:
         if pk is None:
-            return                    # newly created object, nothing to check
-        else:
-            slf.concurrency_problem = _("In the mean time, someone "
-                "<b>created</b> the item in the database.") + ' ' + unicode(RELOAD_MSG)
-    else:
-        if pk is None:
-            slf.concurrency_problem = _("Please note: In the mean time, "
-                "someone <b>removed</b> the item from the database.<br /><b>"
-                "Submit the form again</b> in case you are sure to create it.")
-            slf.data = slf.data.copy()    # make the data dict mutable first
-            slf.data['object_version'] = ''
+            # newly created object, nothing to check
+            return
+        slf.concurrency_problem = _("The form is missing the object version check field.")
 
-        elif form_pk != unicode(pk):
-            raise RuntimeError("Bogus primary key situation.")
+    elif pk is None:
+        slf.concurrency_problem = _("In the mean time, someone <b>removed</b> the item from "
+                                    "the database.<br><b>Submit the form again</b> in case "
+                                    "you are sure to create it.")
+        slf.data = slf.data.copy()    # make the data dict mutable first
+        slf.data['object_version'] = ''
+
+    elif form_pk != unicode(pk):
+        raise RuntimeError(_("Found not matching primary key in object_version field."))
 
     if not slf.concurrency_problem:
         db_obj = slf._meta.model.objects.get(pk=pk)
         db_hash = _gen_object_hash(db_obj)
         if form_hash != db_hash:
             slf.concurrency_problem = _("In the mean time, someone "
-                "<b>changed</b> this item in the database.") + ' ' + unicode(RELOAD_MSG)
-
-#            try:
-#                modified = db_obj.modified.strftime('%Y-%m-%d %H:%M:%S')
-#                slf.concurrency_problem += "<br />" \
-#                                 + _("Database item changed at %s.") % modified
-#            except AttributeError:
-#                pass
+                                        "<b>changed</b> this item in the database.") + ' ' \
+                                      + unicode(slf._CONCURRENCY_EDIT_MESSAGE)
 
     if slf.concurrency_problem:
         errors = slf._errors.setdefault(forms.forms.NON_FIELD_ERRORS,
                                         forms.util.ErrorList())
         errors.append(mark_safe(slf.concurrency_problem))
-
-
-RELOAD_MSG = _("Please <a href=''>RELOAD</a> and edit again.<br />"
-               "<b>WARNING:</b> Your changes are almost LOST now and can't be"
-               " saved.<br />But you still have a chance to copy them out.")
 
 
 class ConcurrencyProtectionModelForm(forms.ModelForm):
@@ -65,7 +60,20 @@ class ConcurrencyProtectionModelForm(forms.ModelForm):
     When the form is displayed for edition, the hash of its values is created.
     During cleaning, the hash from the current object in database is created
     again and compared. The mismatch reveals that the object has been changed
-    in the meantime resulting in the validation error.
+    in the meantime -- then the validation error is raised.
+
+    Example::
+
+        class MyModelForm(ConcurrencyProtectionModelForm):
+            class Meta:
+                model = MyModel
+
+    Use this also in your ModelAdmin descendants::
+
+        class QuestionSetAdmin(admin.ModelAdmin):
+            form = ConcurrencyProtectionModelForm
+
+    This way concurrent updates will be watched from both your UI and django.contrib.admin.
     """
     object_version = forms.CharField(required=False, widget=forms.HiddenInput)
 
@@ -76,36 +84,45 @@ class ConcurrencyProtectionModelForm(forms.ModelForm):
 
     clean_object_version = _clean_object_version
 
+    _CONCURRENCY_EDIT_MESSAGE = CONCURRENCY_EDIT_MESSAGE
 
-class ConcurrencyProtectionModelAdmin(admin.ModelAdmin):
-    """
-    You may want to avoid the situations when the admin user overwrites
-    the changes of anybody else. In that case, inherit your model admins from
-    this class instead of the usual admin.ModelAdmin.
-    The admin form will be monkey patched with the protection field.
-    """
-    def get_form(self, request, obj=None, **kwargs):
-        form = super(ConcurrencyProtectionModelAdmin, self).get_form(request, obj, **kwargs)
 
-        if obj is not None:
-            form.concurrency_problem = None
-            field = forms.CharField(initial=_gen_object_version(obj),
-                                    required=False)
-            form.base_fields['object_version'] = field
-            form.clean_object_version = _clean_object_version
-
-        return form
+# DEPRECATED -- it does not work in Django 1.6.
+#               Use 'form = ConcurrencyProtectionModelForm' instead.
+#
+# class ConcurrencyProtectionModelAdmin(admin.ModelAdmin):
+#     """
+#
+#     You may want to avoid the situations when the admin user overwrites
+#     the changes of anybody else. In that case, inherit your model admins from
+#     this class instead of the usual admin.ModelAdmin.
+#     The admin form will be monkey patched with the protection field.
+#     """
+#     def get_form(self, request, obj=None, **kwargs):
+#         form = super(ConcurrencyProtectionModelAdmin, self).get_form(request, obj, **kwargs)
+#
+#         if obj is not None:
+#             form.concurrency_problem = None
+#             field = forms.CharField(initial=_gen_object_version(obj), required=False)
+#             form.base_fields['object_version'] = field
+#             form.clean_object_version = _clean_object_version
+#         return form
 
 
 class ConcurrencyProtectionUserChangeForm(UserChangeForm):
     """
-     UserAdmin can be re-registered like this::
+    UserAdmin can be re-registered like this::
 
         from django.contrib.auth.admin import UserAdmin as DjangoUserAdmin
         from useful.django.concurrency import ConcurrencyProtectionUserChangeForm
 
         class UserAdmin(DjangoUserAdmin):
             form = ConcurrencyProtectionUserChangeForm
+
+            fieldsets = (
+                ...,
+                (None, {'fields': ('object_version',)}),
+            )
 
         admin.site.unregister(User)
         admin.site.register(User, UserAdmin)
@@ -118,6 +135,8 @@ class ConcurrencyProtectionUserChangeForm(UserChangeForm):
         self.fields['object_version'].initial = _gen_object_version(self.instance)
 
     clean_object_version = _clean_object_version
+
+    _CONCURRENCY_EDIT_MESSAGE = CONCURRENCY_EDIT_MESSAGE
 
 
 def _gen_hmac(pk, hash):
@@ -157,7 +176,7 @@ def _validate_object_version(datadict):
             if not form_pk or not form_hash or not form_hmac:
                 raise ValueError
         except ValueError:
-            raise forms.ValidationError("Bad version format.")
+            raise forms.ValidationError("Bad object_version format.")
 
         if not constant_time_compare(form_hmac, _gen_hmac(form_pk, form_hash)):
             raise forms.ValidationError(_("Version protection tampered."))
