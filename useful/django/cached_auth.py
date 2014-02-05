@@ -27,7 +27,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 from django.conf import settings
 from django.contrib.auth import get_user, SESSION_KEY
-from django.core.cache import cache
+from django.core import cache  # Importing this way so debug_toolbar can patch it later.
 from django.db import models
 from django.db.models.signals import post_save, post_delete
 from django.utils.functional import SimpleLazyObject
@@ -54,7 +54,8 @@ def invalidate_cache(sender, instance, **kwargs):  # @UnusedVariable
         key = CACHE_KEY % instance.id
     else:
         key = CACHE_KEY % instance.user_id
-    cache.delete(key)
+
+    cache.cache.delete(key)
 
 
 def get_cached_user(request):
@@ -63,7 +64,7 @@ def get_cached_user(request):
     if not hasattr(request, '_cached_user'):
         try:
             key = CACHE_KEY % request.session[SESSION_KEY]
-            user = cache.get(key)
+            user = cache.cache.get(key)
         except KeyError:
             user = AnonymousUser()
 
@@ -77,7 +78,7 @@ def get_cached_user(request):
                 # Handle exception for user with no profile and AnonymousUser
                 except (profile_model.DoesNotExist, AttributeError):
                     pass
-            cache.set(key, user)
+            cache.cache.set(key, user)
         request._cached_user = user
     return request._cached_user
 
