@@ -1,3 +1,4 @@
+import os
 import re
 import urllib
 
@@ -118,3 +119,31 @@ def middle_truncate(value, size):
             return value[:size] + u'\u2026'
     else:
         return value
+
+
+@register.filter
+def file_exists(fieldfile):
+    """
+    Calls the file storage backend to test whether the file physically exists.
+    There's no obvious way Django 1.6 offers this.
+
+    Example given your Comment model has `attachment` FileField::
+
+        <a href="{{ comment.attachment.url }}">
+            {{ comment.attachment.name|strip_path }}
+        </a>
+        {% if comment.attachment|file_exists %}
+            ({{ comment.attachment.size|filesizeformat }})
+        {% endif %}
+    """
+    return fieldfile.storage.exists(fieldfile.path)
+
+
+@register.filter
+def strip_path(filepath):
+    """
+    'same/path/to/filename.jpg' -> 'filename.jpg'
+
+    For example usage see doc of file_exists.
+    """
+    return os.path.split(filepath)[1]
