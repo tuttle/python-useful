@@ -129,7 +129,7 @@ class LogEntryAdmin(ReadOnlyModelAdmin):
     def action(self, obj):
         r = obj.object_repr
         if not obj.is_deletion() and obj.get_admin_url():
-            r = '<a href="/admyn/%s">%s</a>' % (obj.get_admin_url(), r)
+            r = '<a href="%s">%s</a>' % (obj.get_admin_url(), r)
         return '<span class="%s">%s</span>' % (CHTYPES[obj.action_flag], r)
     action.allow_tags = True
     action.short_description = _("Action, object")
