@@ -1,0 +1,287 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title>Django Models in no time</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<style type="text/css">
+	body { margin:0; padding:0; font: 12px/1.4em Verdana,sans-serif; }
+	#header { background: none repeat scroll 0 0 #092E20; height: 6.5em; position: relative; color: white; }
+	#header a, #header a:visited { color: white }
+	#content a, #content a:visited { color: #AB5603 }
+	#header #logo { bottom: 10px; height: 41px; left: 25px; margin:0; position: absolute; }
+	#header #hdr { bottom: 0px; height: 40px; left: 150px; margin:0; position: absolute; font-size: 200%; color: #E0FFB8}
+	#header #contact { right: 10px; height: 35px; bottom: 0px; position:absolute; color: #FFC757 }
+	#content { padding: 1em; }
+	#prefs { width: 80em; padding: 0 }
+	#prefs li { width: 30em; display: inline-block; }
+	.comment { font-style: italic; font-size: 90% }
+	#dst-container { width: 60em }
+	#dst_code { min-height: 75em }
+	textarea { vertical-align: top }
+	.nowrap { white-space: nowrap }
+	pre {
+		margin: 0; padding: 0;
+		display: inline-block;
+		white-space: pre-wrap; /* css-3 */
+		white-space: -moz-pre-wrap !important; /* Mozilla, since 1999 */
+		white-space: -pre-wrap; /* Opera 4-6 */
+		white-space: -o-pre-wrap; /* Opera 7 */
+		word-wrap: break-word; /* Internet Explorer 5.5+ */
+	}
+</style>
+<link rel="stylesheet" href="http://yandex.st/highlightjs/6.1/styles/github.css">
+</head>
+<body>
+	<div id="header">
+		<span id="logo"><a href="https://www.djangoproject.com/"><img src="https://www.djangoproject.com/m/img/site/hdr_logo.gif" alt="Django"></a></span>
+		<span id="hdr">Models in no time</span>
+		<span id="contact">Created by <a href="http://www.linkedin.com/in/vladamacek/">Vláďa Macek</a>,
+		2012-4, 
+		<a href="mailto:macek@sandbox.cz?subject=Feedback:%20django%20models%20in%20no%20time">feedback</a>
+		is welcome. Or file an Issue.</span>
+	</div>
+
+	<div id="content">
+		<form name="form" action="">
+		<ul id="prefs">
+			<li>
+				Verbose names:
+				<input type="radio" name="verb" value="" id="verb0" onchange="compute()"
+				><label for="verb0">Off</label>
+				<input type="radio" name="verb" value="verbnames" id="verb1" checked="checked" onchange="compute()"
+				><label for="verb1">On</label>
+				<input type="radio" name="verb" value="gettext" id="verb2" onchange="compute()"
+				><label for="verb2">Gettext</label>
+			</li>
+			<li>
+				Base:
+				<input type="radio" name="base" value="models.Model" id="base0" checked="checked" onchange="compute()"
+				><label for="base0">models.Model</label>
+				<input type="radio" name="base" value="TimeStampedModel" id="base1" onchange="compute()"
+				><label for="base1">TimeStampedModel</label>
+			</li>
+			<li>
+				Widget:
+				<input type="radio" name="widget" value="" id="widget0" onchange="compute()"
+				><label for="widget0">Textarea</label>
+				<input type="radio" name="widget" value="colorcode" id="widget1" checked="checked" onchange="compute()"
+				><label for="widget1">Colored code</label>
+			</li>
+			<li class="comment">These preferences are remembered in a cookie.</li>
+		</ul>
+		<p><strong>Supported field types:</strong> bo boz in inz ch chz tx txz dt dtz dd ddz fk fkz mm mmz</p>
+
+		<div class="nowrap"><textarea onKeyUp="compute()" name="src" rows="60" cols="40">
+Category
+ch name
+
+Post
+ch name
+bo active
+fk category
+dt posted_at
+txz body
+in score
+</textarea>
+		<span style="vertical-align: top; font-size: 30px">&rarr;</span>
+		<pre id="dst-container"><code id="dst_code" class="python">Code</code></pre>
+		<textarea name="dst_area" style="display: none" rows="60" cols="100" readonly="readonly"></textarea>
+		</div>
+		</form>
+
+		<br>
+		<p><strong>Please note:</strong> The generated code is not guaranteed to work right away.
+		It is intended to spare you the primary typing work.</p>
+
+		<p class="comment">
+		Developed on Firefox on Linux. Please point me to bugs or send fixes. MIT licensed, feedback appreciated.<br>
+		(Header design and logo copied from
+		<a href="http://djangoproject.com/">http://djangoproject.com/</a>.
+		Using the wonderful <a href="http://softwaremaniacs.org/soft/highlight/en/">highlight.js</a>
+		library.)
+		</p>
+	</div>
+	<script src="http://yandex.st/highlightjs/6.1/highlight.min.js" type="text/javascript"></script>
+
+	<script type="text/javascript">
+var f = document.form, dst_code = document.getElementById('dst_code');
+var old_prefs = get_cookie();
+
+function get_radio(field) {
+	for (var i=0; i<field.length; i++)
+		if (field[i].checked) return field[i].value;
+}
+
+function camelize(str) {
+	var s = str.replace(/_(.)/g, function (x, chr) { return chr.toUpperCase() });
+	return s.charAt(0).toUpperCase() + s.slice(1);
+};
+
+function uncamelize(str) {
+	if (!str) return '';
+	return str.replace(/\W+/g, '_').replace(/([a-z\d])([A-Z])/g, '$1_$2').toLowerCase();
+};
+
+function humanize_field(str) {
+	var s = str.replace(/_(.)/g, function (x, chr) { return ' ' + chr });
+	return s.charAt(0).toUpperCase() + s.slice(1);
+};
+
+function humanize_class(str) {
+	var s = uncamelize(str).replace('_', ' ');
+	return s.charAt(0).toUpperCase() + s.slice(1);
+};
+
+function pluralize(s) {
+	if (s.slice(-1) == 'y') s = s.slice(0, -1) + 'ies'
+	else if (s.slice(-1) == 's') s = s.slice(0, -1) + 'ses'
+	else if (s.slice(-2) == 'ch') s = s.slice(0, -2) + 'ches'
+	else s += 's';
+	return s;
+};
+
+function set_cookie(value) {
+	var cs = 'modelsinnotimeprefs=' + escape(value);
+	cs += "; expires=" + (new Date(2100,1,1)).toGMTString();
+	document.cookie = cs;
+}
+
+function get_cookie() {
+	var results = document.cookie.match('(^|;) ?modelsinnotimeprefs=([^;]*)(;|$)');
+	return (results) ? unescape(results[2]) : '';
+}
+
+function compute() {
+	var verb = get_radio(f.verb), base = get_radio(f.base), widget = get_radio(f.widget);
+	var i, o1='', o2 = new Array(), o3='', o4;
+	var o5='', o0='from django.db import models\n', blocks=f.src.value.split(/\r?\n\r?\n/);
+	var prefs = verb + ' ' + base + ' ' + widget;
+
+	if (old_prefs != prefs) {
+		set_cookie(prefs);
+		old_prefs = prefs;
+	}
+
+	if (verb == 'gettext')
+		o0 += 'from django.utils.translation import ugettext_lazy as _\n';
+	if (base == 'TimeStampedModel')
+		o0 += 'from django_extensions.db.models import TimeStampedModel\n';
+	if (widget == 'colorcode') {
+		dst_code.parentNode.style.display = 'inline-block';
+		f.dst_area.style.display = 'none';
+	} else {
+		dst_code.parentNode.style.display = 'none';
+		f.dst_area.style.display = 'inline-block';
+	};
+
+	for (i=0; i<blocks.length; i++) {
+		if (!blocks[i]) continue;
+		var j, lines = blocks[i].split(/\r?\n/);
+		o1 += 'class ' + lines[0] + '(' + base + '):\n';
+		o2.push(lines[0]);
+		o4 = new Array();
+		o5 += 'admin.site.register(' + lines[0] + ', ' + lines[0] + 'Admin)\n';
+
+		for (j=1; j<lines.length; j++) {
+			var lt = lines[j].split(' ');
+			if (!lt[0]) continue;
+			var fld = lt[1] || '';
+			var cmd = lt[0].slice(0,2).toLowerCase();
+			if (cmd != 'mm') o4.push(fld);
+			var fldh = humanize_field(fld);
+			fldh = (verb == 'gettext') ? '_("' + fldh + '")' : '"' + fldh + '"';
+			//console.log(lt, fld);
+			switch (cmd) {
+			  case 'ch':	o1 += '    ' + fld + ' = models.CharField(';
+					if (verb) o1 += fldh + ', ';
+					if (lt[0][2] == 'z') o1 += 'blank=True, ';
+					o1 += 'max_length=255)\n';
+					break;
+			  case 'tx':	o1 += '    ' + fld + ' = models.TextField(';
+					if (verb) o1 += fldh;
+					if (verb && (lt[0][2] == 'z')) o1 += ', ';
+					if (lt[0][2] == 'z') o1 += 'blank=True';
+					o1 += ')\n';
+					break;
+			  case 'in':	o1 += '    ' + fld + ' = models.IntegerField('
+					if (verb) o1 += fldh;
+					if (verb && (lt[0][2] == 'z')) o1 += ', ';
+					if (lt[0][2] == 'z') o1 += 'blank=True, null=True';
+					o1 += ')\n';
+					break;
+			  case 'dt':	o1 += '    ' + fld + ' = models.DateTimeField(';
+					if (verb) o1 += fldh;
+					if (verb && (lt[0][2] == 'z')) o1 += ', ';
+					if (lt[0][2] == 'z') o1 += 'blank=True, null=True';
+					o1 += ')\n';
+					break;
+			  case 'dd':	o1 += '    ' + fld + ' = models.DateField(';
+					if (verb) o1 += fldh;
+					if (verb && (lt[0][2] == 'z')) o1 += ', ';
+					if (lt[0][2] == 'z') o1 += 'blank=True, null=True';
+					o1 += ')\n';
+					break;
+			  case 'fk':    o1 += '    ' + fld + ' = models.ForeignKey(' + camelize(fld);
+					if (verb) o1 += ', verbose_name=' + fldh;
+					if (lt[0][2] == 'z') o1 += ', blank=True, null=True';
+					//o1 += ", related_name='" + pluralize(uncamelize(lines[0])) + "'";
+					o1 += ", on_delete=models.CASCADE|PROTECT|SET()|SET_NULL|SET_DEFAULT|DO_NOTHING)\n";
+					break;
+			  case 'mm':    o1 += '    ' + pluralize(fld) + ' = models.ManyToManyField(' + camelize(fld);
+					if (verb) {
+						fldh = humanize_field(pluralize(fld));
+						fldh = (verb == 'gettext') ? '_("' + fldh + '")' : '"' + fldh + '"';
+						o1 += ', verbose_name=' + fldh;
+					}
+					if (lt[0][2] == 'z') o1 += ', blank=True';
+					//o1 += ", related_name='" + pluralize(uncamelize(lines[0])) + "')
+					o1 += ")\n";
+					break;
+			  case 'bo':    o1 += '    ' + fld + ' = models.';
+					o1 += (lt[0][2] == 'z') ? 'NullBooleanField(' : 'BooleanField(';
+					if (verb) o1 += fldh + ', ';
+					o1 += "default=False)\n";
+					break;
+			  default:
+					o1 += '# line unrecognized: ' + lines[j] + '\n';
+			}
+		}
+		o1 += '\n';
+		if (verb == 'gettext') {
+			var hc = humanize_class(lines[0]);
+			o1 += '    class Meta:\n        verbose_name = _("' + hc + '")\n';
+			o1 += '        verbose_name_plural = _("' + pluralize(hc) + '")\n';
+			o1 += '#        unique_together = ()\n\n';
+		}
+		o3 += 'class ' + lines[0] + "Admin(admin.ModelAdmin):\n    list_display = (";
+		if (base == 'TimeStampedModel') o3 += "'created', ";
+		if (o4.length) {
+			o1 += '    def __unicode__(self):\n        return self.' + o4[0] + '\n\n\n';
+			o3 += "'" + o4.join("', '") + "'";
+		}
+		o3 += ")\n    list_filter = ()\n    search_fields = ()\n    date_hierarchy = '";
+		if (base == 'TimeStampedModel') o3 += 'created';
+		o3 += "'\n\n\n";
+	}
+	var o = o0 + '\n\n' + o1 + '# admin.py:\nfrom django.contrib import admin\n\nfrom .models import ' + o2.join(', ') + '\n\n\n' + o3 + o5;
+	if (widget == 'colorcode') {
+		dst_code.textContent = o;
+		hljs.highlightBlock(dst_code);
+	} else f.dst_area.value = o;
+};
+
+if (old_prefs) {
+	var chi = (old_prefs.indexOf('gettext') != -1) ? 2 : (old_prefs.indexOf('verbnames') != -1) ? 1 : 0;
+	f.verb[chi].checked = true;
+	chi = (old_prefs.indexOf('TimeStampedModel') != -1) ? 1 : 0;
+	f.base[chi].checked = true;
+	chi = (old_prefs.indexOf('colorcode') != -1) ? 1 : 0;
+	f.widget[chi].checked = true;
+}
+
+compute();
+f.src.focus();
+f.src.select();
+	</script>
+</body>
+</html>
