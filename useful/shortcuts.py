@@ -1,3 +1,15 @@
+from itertools import ifilter
+
+
+def first(predicate_or_None, iterable, default=None):
+    """
+    Returns the first item of iterable for which predicate(item) is true.
+    If predicate is None, matches the first item that is true.
+    Returns value of default in case of no matching items.
+    """
+    return next(ifilter(predicate_or_None, iterable), default)
+
+
 def int_or_0(value):
     try:
         return int(value)
