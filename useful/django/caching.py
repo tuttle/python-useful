@@ -46,6 +46,10 @@ def cached_function(func=None, num_args_to_key=None, timeout=DEFAULT_TIMEOUT):
             raise RuntimeError("cached_function does not allow function to have default args "
                                "in order to keep the number of passed args fixed.")
 
+        if func.__name__ == '<lambda>':
+            raise RuntimeError("cached_function can't work on anonymous funcs in order "
+                               "to keep the name unique.")
+
         @wraps(func)
         def wrapper(*args):
             key_args = args if num_args_to_key is None else args[:num_args_to_key]
@@ -55,7 +59,7 @@ def cached_function(func=None, num_args_to_key=None, timeout=DEFAULT_TIMEOUT):
                 raise RuntimeError("cached_function received unallowed types of keyable args: %s" \
                                    % ', '.join(map(str, unallowed_types)))
 
-            key_fmt = 'cached_function:%s.%s_%x(%%s)' % (func.__module__, func.__name__, id(func))
+            key_fmt = 'cached_function:%s.%s(%%s)' % (func.__module__, func.__name__)
             key = key_fmt % ','.join(map(repr, key_args))
 
             if len(key) > 200:
