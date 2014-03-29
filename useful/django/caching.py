@@ -55,7 +55,7 @@ def cached_function(func=None, num_args_to_key=None, timeout=DEFAULT_TIMEOUT):
                 raise RuntimeError("cached_function received unallowed types of keyable args: %s" \
                                    % ', '.join(map(str, unallowed_types)))
 
-            key_fmt = 'cached_function:%s.%s(%%s)' % (func.__module__, func.__name__)
+            key_fmt = 'cached_function:%s.%s_%x(%%s)' % (func.__module__, func.__name__, id(func))
             key = key_fmt % ','.join(map(repr, key_args))
 
             if len(key) > 200:
