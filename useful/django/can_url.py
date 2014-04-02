@@ -25,8 +25,14 @@ def get_all_callbacks(urlconf):
 
             elif pattern.name is not None:
                 ns_name = namespace + (':' if namespace else '') + pattern.name
-                if ns_name in callbacks:
-                    raise RuntimeError("Found multiple URL patterns named %r" % ns_name)
+                prev_callback = callbacks.get(ns_name)
+                if prev_callback:
+                    if getattr(pattern.callback, 'can_url_perms', None) != \
+                       getattr(prev_callback, 'can_url_perms', None):
+                        raise RuntimeError("Found multiple URL patterns named %r with different "
+                                           "perms. If you want to decorate single view multiple "
+                                           "times with urlpatterns.url, add perms= option to the "
+                                           "last decorator only, it will apply to all." % ns_name)
                 callbacks[ns_name] = pattern.callback
 
     add_callbacks(urlresolvers.get_resolver(urlconf), '')
