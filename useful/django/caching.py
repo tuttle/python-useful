@@ -1,6 +1,5 @@
 from functools import wraps
 import hashlib
-import sys
 
 from django.core import cache # Importing this way so debug_toolbar can patch it later.
 from django.core.cache.backends.base import DEFAULT_TIMEOUT

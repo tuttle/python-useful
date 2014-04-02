@@ -5,7 +5,6 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.safestring import mark_safe
 from django.utils.encoding import smart_unicode
 from django.utils.crypto import salted_hmac, constant_time_compare
-from django.contrib import admin
 from django.contrib.auth.forms import UserChangeForm
 
 
