@@ -52,6 +52,8 @@ def getfrom(key, mapping):
     return mapping.get(key)
 
 
+INTSPACE_RE = re.compile(r'^(-?\d+)(\d{3})')
+
 @register.filter(is_safe=True)
 def intspace(value):
     """
@@ -59,7 +61,7 @@ def intspace(value):
     For example, 3000 becomes '3 000' and 45000 becomes '45 000'.
     """
     orig = force_unicode(value)
-    new = re.sub("^(-?\d+)(\d{3})", '\g<1> \g<2>', orig)
+    new = INTSPACE_RE.sub('\g<1> \g<2>', orig)
     return new if orig == new else intspace(new)
 
 
@@ -84,27 +86,27 @@ def startswith(s1, s2):
 @stringfilter
 def urlizetruncblank(value, limit, autoescape=None):
     """
-    Converts URLs into clickable links, truncating URLs to the given character
+    Converts URLs in text into clickable links, truncating URLs to the given character
     limit, and adding 'rel=nofollow' attribute to discourage spamming.
     The target is opened in the blank browser window.
 
     Argument: Length to truncate URLs to.
     """
-    value = value.replace(' ', '%20')
     u = urlize(value, trim_url_limit=int(limit), nofollow=True, autoescape=autoescape)
-    if u.startswith('<a '):
-        u = '<a target="_blank" ' + u[3:]
+    u = u.replace('<a ', '<a target="_blank" ')
     return mark_safe(u)
 urlizetruncblank.is_safe = True
 urlizetruncblank.needs_autoescape = True
 
 
 @register.filter
+@stringfilter
 def urlquote_plus(url):
     return force_unicode(urllib.quote_plus(url))
 
 
 @register.filter
+@stringfilter
 def middle_truncate(value, size):
     """
     Truncates a string to the given size placing the ellipsis in the middle.
@@ -140,6 +142,7 @@ def file_exists(fieldfile):
 
 
 @register.filter
+@stringfilter
 def strip_path(filepath):
     """
     'same/path/to/filename.jpg' -> 'filename.jpg'
