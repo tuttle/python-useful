@@ -21,6 +21,9 @@ class UrlPatterns(list):
     the URL name (it can be automatically set by the name of the view func).
     The URL patterns are then closer to the views.
 
+    NOTE: As it adds the view to the URLConf, this is the last (outermost) decorator
+          to change the view behavior!
+
     Example::
 
         urlpatterns = UrlPatterns()

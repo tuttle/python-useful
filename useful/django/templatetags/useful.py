@@ -1,12 +1,12 @@
 import os
 import re
-import urllib
 
 from django import template
 from django.template.defaultfilters import stringfilter
 from django.utils.encoding import force_unicode
 from django.utils.safestring import mark_safe
 from django.utils.html import urlize
+from django.utils.http import urlquote_plus as django_urlquote_plus
 
 register = template.Library()
 
@@ -99,10 +99,18 @@ urlizetruncblank.is_safe = True
 urlizetruncblank.needs_autoescape = True
 
 
-@register.filter
+@register.filter(is_safe=False)
 @stringfilter
-def urlquote_plus(url):
-    return force_unicode(urllib.quote_plus(url))
+def urlquote_plus(value, safe=None):
+    """
+    Escapes a value for use in a URL, but also replaces spaces by plus signs, as required
+    for quoting HTML form values when building up a query string to go into a URL.
+    This is a _plus version of the standard Django urlencode defaultfilter.
+    """
+    kwargs = {}
+    if safe is not None:
+        kwargs['safe'] = safe
+    return django_urlquote_plus(value, **kwargs)
 
 
 @register.filter
