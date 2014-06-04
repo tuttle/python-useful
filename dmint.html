@@ -247,10 +247,15 @@ function compute() {
 		oM += '\n';
 		if (verb == 'gettext') {
 			var hc = humanize_class(lines[0]);
-			oM += '    class Meta:\n        verbose_name = _("' + hc + '")\n';
+			oM += '    class Meta:\n';
+			oM += '        verbose_name = _("' + hc + '")\n';
 			oM += '        verbose_name_plural = _("' + pluralize(hc) + '")\n';
-			oM += '#        unique_together = ()\n\n';
+		} else {
+			oM += '#    class Meta:\n';
 		}
+		oM += '#        unique_together = ()\n';
+		oM += '#        index_together = ()\n\n';
+
 		oA += 'class ' + lines[0] + "Admin(admin.ModelAdmin):\n    list_display = (";
 		if (base == 'TimeStampedModel') oA += "'created', ";
 		if (oAL && oAL.length) {
