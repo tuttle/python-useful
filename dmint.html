@@ -1,35 +1,36 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-<title>Django Models in no time</title>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<style type="text/css">
-	body { margin:0; padding:0; font: 12px/1.4em Verdana,sans-serif; }
-	#header { background: none repeat scroll 0 0 #092E20; height: 6.5em; position: relative; color: white; }
-	#header a, #header a:visited { color: white }
-	#content a, #content a:visited { color: #AB5603 }
-	#header #logo { bottom: 10px; height: 41px; left: 25px; margin:0; position: absolute; }
-	#header #hdr { bottom: 0px; height: 40px; left: 150px; margin:0; position: absolute; font-size: 200%; color: #E0FFB8}
-	#header #contact { right: 10px; height: 35px; bottom: 0px; position:absolute; color: #FFC757 }
-	#content { padding: 1em; }
-	#prefs { width: 80em; padding: 0 }
-	#prefs li { width: 30em; display: inline-block; }
-	.comment { font-style: italic; font-size: 90% }
-	#dst-container { width: 60em }
-	#dst_code { min-height: 75em }
-	textarea { vertical-align: top }
-	.nowrap { white-space: nowrap }
-	pre {
-		margin: 0; padding: 0;
-		display: inline-block;
-		white-space: pre-wrap; /* css-3 */
-		white-space: -moz-pre-wrap !important; /* Mozilla, since 1999 */
-		white-space: -pre-wrap; /* Opera 4-6 */
-		white-space: -o-pre-wrap; /* Opera 7 */
-		word-wrap: break-word; /* Internet Explorer 5.5+ */
-	}
-</style>
-<link rel="stylesheet" href="http://yandex.st/highlightjs/6.1/styles/github.css">
+	<title>Django Models in no time</title>
+	<meta name="description" content="The in-browser tool allowing you to quickly prototype the Django models.py and admin.py code blocks. JavaScript-based, no data sent out.">
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<style type="text/css">
+		body { margin:0; padding:0; font: 12px/1.4em Verdana,sans-serif; }
+		#header { background: none repeat scroll 0 0 #092E20; height: 6.5em; position: relative; color: white; }
+		#header a, #header a:visited { color: white }
+		#content a, #content a:visited { color: #AB5603 }
+		#header #logo { bottom: 10px; height: 41px; left: 25px; margin:0; position: absolute; }
+		#header #hdr { bottom: 0px; height: 40px; left: 150px; margin:0; position: absolute; font-size: 200%; color: #E0FFB8}
+		#header #contact { right: 10px; height: 35px; bottom: 0px; position:absolute; color: #FFC757 }
+		#content { padding: 1em; }
+		#prefs { width: 80em; padding: 0 }
+		#prefs li { width: 30em; display: inline-block; }
+		.comment { font-style: italic; font-size: 90% }
+		#dst-container { width: 60em }
+		#dst_code { min-height: 75em }
+		textarea { vertical-align: top }
+		.nowrap { white-space: nowrap }
+		pre {
+			margin: 0; padding: 0;
+			display: inline-block;
+			white-space: pre-wrap; /* css-3 */
+			white-space: -moz-pre-wrap !important; /* Mozilla, since 1999 */
+			white-space: -pre-wrap; /* Opera 4-6 */
+			white-space: -o-pre-wrap; /* Opera 7 */
+			word-wrap: break-word; /* Internet Explorer 5.5+ */
+		}
+	</style>
+	<link rel="stylesheet" href="http://yandex.st/highlightjs/6.1/styles/github.css">
 </head>
 <body>
 	<div id="header">
@@ -37,7 +38,7 @@
 		<span id="hdr">Models in no time</span>
 		<span id="contact">Created by <a href="http://www.linkedin.com/in/vladamacek/">Vláďa Macek</a>,
 		Feb 2012+,
-		<a href="mailto:macek@sandbox.cz?subject=Feedback:%20django%20models%20in%20no%20time">feedback</a>
+		<a href="mailto:macek@sandbox.cz?subject=Feedback:%20Django%20models%20in%20no%20time">feedback</a>
 		is welcome. Or <a href="https://github.com/tuttle/python-useful/issues">file an Issue</a>.</span>
 	</div>
 
@@ -93,12 +94,12 @@ in score
 		<p><strong>Please note:</strong> The generated code is not guaranteed to work right away.
 		It is intended to spare you the primary typing work. Not rushing to have every field or feature supported, <a href="http://en.wikipedia.org/wiki/KISS_principle">KISS</a>ing instead.</p>
 
+		<p><strong>Privacy note:</strong> DMint uses local JavaScript, sends nothing anywhere.</p>
+
 		<p class="comment">
-		Developed on Firefox on Linux. MIT licensed, feedback appreciated.
-		(Header design and logo copied from
-		<a href="http://djangoproject.com/">http://djangoproject.com/</a>.
-		Using the wonderful <a href="http://softwaremaniacs.org/soft/highlight/en/">highlight.js</a>
-		library.)
+		Developed using Firefox on Linux. MIT licensed, feedback appreciated.
+		(Header design and logo from <a href="http://djangoproject.com/">http://djangoproject.com/</a>.
+		Using the wonderful <a href="http://softwaremaniacs.org/soft/highlight/en/">highlight.js</a> library.)
 		</p>
 	</div>
 	<script src="http://yandex.st/highlightjs/6.1/highlight.min.js" type="text/javascript"></script>
@@ -262,8 +263,8 @@ function compute() {
 		if (oAL && oAL.length) {
 			oM += '    def __unicode__(self):\n        return self.' + oAL[0] + '\n\n\n';
 			oA += "'" + oAL.join("', '") + "'";
+			if ((oAL.length == 1) && (base != 'TimeStampedModel')) oA += ', ';
 		}
-		if (base != 'TimeStampedModel') oA += ', ';
 		oA += ")\n    list_filter = ()\n    search_fields = ()\n    date_hierarchy = '";
 		if (base == 'TimeStampedModel') oA += 'created';
 		oA += "'\n\n\n";
