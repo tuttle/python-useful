@@ -256,12 +256,14 @@ function compute() {
 		oM += '#        unique_together = ()\n';
 		oM += '#        index_together = ()\n\n';
 
-		oA += 'class ' + lines[0] + "Admin(admin.ModelAdmin):\n    list_display = (";
+		oA += 'class ' + lines[0] + "Admin(admin.ModelAdmin):\n";
+		oA += '    list_display = (';
 		if (base == 'TimeStampedModel') oA += "'created', ";
 		if (oAL && oAL.length) {
 			oM += '    def __unicode__(self):\n        return self.' + oAL[0] + '\n\n\n';
 			oA += "'" + oAL.join("', '") + "'";
 		}
+		if (base != 'TimeStampedModel') oA += ', ';
 		oA += ")\n    list_filter = ()\n    search_fields = ()\n    date_hierarchy = '";
 		if (base == 'TimeStampedModel') oA += 'created';
 		oA += "'\n\n\n";
