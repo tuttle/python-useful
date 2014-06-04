@@ -151,8 +151,8 @@ function get_cookie() {
 
 function compute() {
 	var verb = get_radio(f.verb), base = get_radio(f.base), widget = get_radio(f.widget);
-	var i, o1='', o2 = new Array(), o3='', o4;
-	var o5='', o0='from django.db import models\n', blocks=f.src.value.split(/\r?\n\r?\n/);
+	var i, oM='', oMN = new Array(), oA='', oAL;
+	var oAR='', oI='from django.db import models\n', blocks=f.src.value.split(/\r?\n\r?\n/);
 	var prefs = verb + ' ' + base + ' ' + widget;
 
 	if (old_prefs != prefs) {
@@ -161,9 +161,9 @@ function compute() {
 	}
 
 	if (verb == 'gettext')
-		o0 += 'from django.utils.translation import ugettext_lazy as _\n';
+		oI += 'from django.utils.translation import ugettext_lazy as _\n';
 	if (base == 'TimeStampedModel')
-		o0 += 'from django_extensions.db.models import TimeStampedModel\n';
+		oI += 'from django_extensions.db.models import TimeStampedModel\n';
 	if (widget == 'colorcode') {
 		dst_code.parentNode.style.display = 'inline-block';
 		f.dst_area.style.display = 'none';
@@ -175,93 +175,93 @@ function compute() {
 	for (i=0; i<blocks.length; i++) {
 		if (!blocks[i]) continue;
 		var j, lines = blocks[i].split(/\r?\n/);
-		o1 += 'class ' + lines[0] + '(' + base + '):\n';
-		o2.push(lines[0]);
-		o4 = new Array();
-		o5 += 'admin.site.register(' + lines[0] + ', ' + lines[0] + 'Admin)\n';
+		oM += 'class ' + lines[0] + '(' + base + '):\n';
+		oMN.push(lines[0]);
+		oAL = new Array();
+		oAR += 'admin.site.register(' + lines[0] + ', ' + lines[0] + 'Admin)\n';
 
 		for (j=1; j<lines.length; j++) {
 			var lt = lines[j].split(' ');
 			if (!lt[0]) continue;
 			var fld = lt[1] || '';
 			var cmd = lt[0].slice(0,2).toLowerCase();
-			if (cmd != 'mm') o4.push(fld);
+			if (cmd != 'mm') oAL.push(fld);
 			var fldh = humanize_field(fld);
 			fldh = (verb == 'gettext') ? '_("' + fldh + '")' : '"' + fldh + '"';
 			//console.log(lt, fld);
 			switch (cmd) {
-			  case 'ch':	o1 += '    ' + fld + ' = models.CharField(';
-					if (verb) o1 += fldh + ', ';
-					if (lt[0][2] == 'z') o1 += 'blank=True, ';
-					o1 += 'max_length=255)\n';
+			  case 'ch':	oM += '    ' + fld + ' = models.CharField(';
+					if (verb) oM += fldh + ', ';
+					if (lt[0][2] == 'z') oM += 'blank=True, ';
+					oM += 'max_length=255)\n';
 					break;
-			  case 'tx':	o1 += '    ' + fld + ' = models.TextField(';
-					if (verb) o1 += fldh;
-					if (verb && (lt[0][2] == 'z')) o1 += ', ';
-					if (lt[0][2] == 'z') o1 += 'blank=True';
-					o1 += ')\n';
+			  case 'tx':	oM += '    ' + fld + ' = models.TextField(';
+					if (verb) oM += fldh;
+					if (verb && (lt[0][2] == 'z')) oM += ', ';
+					if (lt[0][2] == 'z') oM += 'blank=True';
+					oM += ')\n';
 					break;
-			  case 'in':	o1 += '    ' + fld + ' = models.IntegerField('
-					if (verb) o1 += fldh;
-					if (verb && (lt[0][2] == 'z')) o1 += ', ';
-					if (lt[0][2] == 'z') o1 += 'blank=True, null=True';
-					o1 += ')\n';
+			  case 'in':	oM += '    ' + fld + ' = models.IntegerField('
+					if (verb) oM += fldh;
+					if (verb && (lt[0][2] == 'z')) oM += ', ';
+					if (lt[0][2] == 'z') oM += 'blank=True, null=True';
+					oM += ')\n';
 					break;
-			  case 'dt':	o1 += '    ' + fld + ' = models.DateTimeField(';
-					if (verb) o1 += fldh;
-					if (verb && (lt[0][2] == 'z')) o1 += ', ';
-					if (lt[0][2] == 'z') o1 += 'blank=True, null=True';
-					o1 += ')\n';
+			  case 'dt':	oM += '    ' + fld + ' = models.DateTimeField(';
+					if (verb) oM += fldh;
+					if (verb && (lt[0][2] == 'z')) oM += ', ';
+					if (lt[0][2] == 'z') oM += 'blank=True, null=True';
+					oM += ')\n';
 					break;
-			  case 'dd':	o1 += '    ' + fld + ' = models.DateField(';
-					if (verb) o1 += fldh;
-					if (verb && (lt[0][2] == 'z')) o1 += ', ';
-					if (lt[0][2] == 'z') o1 += 'blank=True, null=True';
-					o1 += ')\n';
+			  case 'dd':	oM += '    ' + fld + ' = models.DateField(';
+					if (verb) oM += fldh;
+					if (verb && (lt[0][2] == 'z')) oM += ', ';
+					if (lt[0][2] == 'z') oM += 'blank=True, null=True';
+					oM += ')\n';
 					break;
-			  case 'fk':    o1 += '    ' + fld + ' = models.ForeignKey(' + camelize(fld);
-					if (verb) o1 += ', verbose_name=' + fldh;
-					if (lt[0][2] == 'z') o1 += ', blank=True, null=True';
-					//o1 += ", related_name='" + pluralize(uncamelize(lines[0])) + "'";
-					o1 += ", on_delete=models.CASCADE|PROTECT|SET()|SET_NULL|SET_DEFAULT|DO_NOTHING)\n";
+			  case 'fk':    oM += '    ' + fld + ' = models.ForeignKey(' + camelize(fld);
+					if (verb) oM += ', verbose_name=' + fldh;
+					if (lt[0][2] == 'z') oM += ', blank=True, null=True';
+					//oM += ", related_name='" + pluralize(uncamelize(lines[0])) + "'";
+					oM += ", on_delete=models.CASCADE|PROTECT|SET()|SET_NULL|SET_DEFAULT|DO_NOTHING)\n";
 					break;
-			  case 'mm':    o1 += '    ' + pluralize(fld) + ' = models.ManyToManyField(' + camelize(fld);
+			  case 'mm':    oM += '    ' + pluralize(fld) + ' = models.ManyToManyField(' + camelize(fld);
 					if (verb) {
 						fldh = humanize_field(pluralize(fld));
 						fldh = (verb == 'gettext') ? '_("' + fldh + '")' : '"' + fldh + '"';
-						o1 += ', verbose_name=' + fldh;
+						oM += ', verbose_name=' + fldh;
 					}
-					if (lt[0][2] == 'z') o1 += ', blank=True';
-					//o1 += ", related_name='" + pluralize(uncamelize(lines[0])) + "')
-					o1 += ")\n";
+					if (lt[0][2] == 'z') oM += ', blank=True';
+					//oM += ", related_name='" + pluralize(uncamelize(lines[0])) + "')
+					oM += ")\n";
 					break;
-			  case 'bo':    o1 += '    ' + fld + ' = models.';
-					o1 += (lt[0][2] == 'z') ? 'NullBooleanField(' : 'BooleanField(';
-					if (verb) o1 += fldh + ', ';
-					o1 += "default=False)\n";
+			  case 'bo':    oM += '    ' + fld + ' = models.';
+					oM += (lt[0][2] == 'z') ? 'NullBooleanField(' : 'BooleanField(';
+					if (verb) oM += fldh + ', ';
+					oM += "default=False)\n";
 					break;
 			  default:
-					o1 += '# line unrecognized: ' + lines[j] + '\n';
+					oM += '# line unrecognized: ' + lines[j] + '\n';
 			}
 		}
-		o1 += '\n';
+		oM += '\n';
 		if (verb == 'gettext') {
 			var hc = humanize_class(lines[0]);
-			o1 += '    class Meta:\n        verbose_name = _("' + hc + '")\n';
-			o1 += '        verbose_name_plural = _("' + pluralize(hc) + '")\n';
-			o1 += '#        unique_together = ()\n\n';
+			oM += '    class Meta:\n        verbose_name = _("' + hc + '")\n';
+			oM += '        verbose_name_plural = _("' + pluralize(hc) + '")\n';
+			oM += '#        unique_together = ()\n\n';
 		}
-		o3 += 'class ' + lines[0] + "Admin(admin.ModelAdmin):\n    list_display = (";
-		if (base == 'TimeStampedModel') o3 += "'created', ";
-		if (o4.length) {
-			o1 += '    def __unicode__(self):\n        return self.' + o4[0] + '\n\n\n';
-			o3 += "'" + o4.join("', '") + "'";
+		oA += 'class ' + lines[0] + "Admin(admin.ModelAdmin):\n    list_display = (";
+		if (base == 'TimeStampedModel') oA += "'created', ";
+		if (oAL && oAL.length) {
+			oM += '    def __unicode__(self):\n        return self.' + oAL[0] + '\n\n\n';
+			oA += "'" + oAL.join("', '") + "'";
 		}
-		o3 += ")\n    list_filter = ()\n    search_fields = ()\n    date_hierarchy = '";
-		if (base == 'TimeStampedModel') o3 += 'created';
-		o3 += "'\n\n\n";
+		oA += ")\n    list_filter = ()\n    search_fields = ()\n    date_hierarchy = '";
+		if (base == 'TimeStampedModel') oA += 'created';
+		oA += "'\n\n\n";
 	}
-	var o = o0 + '\n\n' + o1 + '# admin.py:\nfrom django.contrib import admin\n\nfrom .models import ' + o2.join(', ') + '\n\n\n' + o3 + o5;
+	var o = oI + '\n\n' + oM + '# admin.py:\nfrom django.contrib import admin\n\nfrom .models import ' + oMN.join(', ') + '\n\n\n' + oA + oAR;
 	if (widget == 'colorcode') {
 		dst_code.textContent = o;
 		hljs.highlightBlock(dst_code);
