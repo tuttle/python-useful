@@ -66,7 +66,7 @@ def prefetch_m2m(m2m_field):
 
         groups_m2m = prefetch_m2m(User.groups)
 
-        {{ groups_m2m|get:user.id|default_if_none:""|join:", " }}
+          {{ groups_m2m|get:user.id|default_if_none:""|join:", " }}
     """
     f = m2m_field.field
     tgt_objs = dict((o.pk, o) for o in f.rel.to.objects.all())
@@ -80,3 +80,25 @@ def prefetch_m2m(m2m_field):
         lookup[src].append(tgt_objs[tgt])
 
     return lookup
+
+
+def get_values_map(klass, by, *fields):
+    """
+    Creates the Python set or dict from data in klass.
+    klass may be a Model, Manager, or QuerySet object.
+    If no fields are given, the result is the set of all distinct values of 'by'.
+    If fields is a single field, the result is dict by->field.
+    Otherwise the key of dict is still 'by', the value is tuple of fields.
+    """
+    queryset = _get_queryset(klass)
+
+    iterator = queryset.values_list(by, *fields).order_by().iterator()
+
+    if len(fields) > 1:
+        return dict((tup[0], tup[1:]) for tup in iterator)
+
+    elif len(fields) == 1:
+        return dict(iterator)
+
+    else:
+        return set(queryset.values_list(by, flat=True).distinct().order_by().iterator())
