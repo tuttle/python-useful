@@ -1,3 +1,4 @@
+from functools import wraps
 import os
 import time
 import errno
@@ -22,7 +23,13 @@ class FileLock(object):
         Usage example::
 
             with FileLock('/tmp/myproject-critical-processing'):
-                print "This section will only be run by a single thread."
+                print "This section will only be executed by a single thread at the same time."
+
+        You can also use the instance as the decorator::
+
+            @FileLock('/tmp/func1-critical-processing')
+            def func1():
+                print "This function will only be executed by a single thread at the same time."
 
     """
     def __init__(self, file_name, timeout=30, delay=.15):
@@ -84,3 +91,14 @@ class FileLock(object):
             lying around.
         """
         self.release()
+
+    def __call__(self, function):
+        """
+        Support for using the instance as decorator. The entire function will be protected.
+        """
+        @wraps(function)
+        def inner(*args, **kwargs):
+            with self:
+                return function(*args, **kwargs)
+
+        return inner
