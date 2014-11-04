@@ -18,3 +18,23 @@ def strip_accents(unistr):
     Return the accent-stripped str for the given unistr (unicode is required).
     """
     return unicodedata.normalize('NFKD', unistr).encode('ascii', 'ignore')
+
+
+def encoded_stream(stream, into='UTF-8'):
+    import codecs
+
+    if (stream.encoding or '').upper() != into.upper():
+        stream = codecs.getwriter(into)(stream)
+
+    return stream
+
+
+def auto_encode_stdout_stderr(into='UTF-8'):
+    """
+    Call this on the top of your program to avoid the need of encoding each printed
+    unicode object when the output encoding is not known such as during shell redirection.
+    """
+    import sys
+
+    sys.stdout = encoded_stream(sys.stdout, into)
+    sys.stderr = encoded_stream(sys.stderr, into)
