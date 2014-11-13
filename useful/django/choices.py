@@ -1,25 +1,28 @@
 class Choices:
     """
-    Encapsulates the choices definitions and conversions.
-    Allows for using custom symbols for individual choices and stores
-    choices as numbers in the database, instead of 1-letter strings.
+    Encapsulates the choices definition and conversion, praises the DRY.
+
+    Allows for using custom symbols as individual choices, bundles them with i18n-enabled labels
+    and stores choices in a way that usually fits more for processing, such as small integers.
+
     Example::
 
         class Payment(models.Model):
-            STATUS = Choices(initial      = (1, _("Awaiting Payment")),
-                             success      = (2, _("Paid OK")),
-                             nok_failure  = (3, _("Payment Failed")))
+            STATUS = Choices(initial      = (100, _("Awaiting Payment")),
+                             success      = (200, _("Paid OK")),
+                             nok_failure  = (300, _("Payment Failed")))
             ...
-            status = models.IntegerField(...,
-                                         choices=STATUS.choices(),
-                                         default=STATUS.initial)
+            status = models.SmallIntegerField(...,
+                                              choices=STATUS.choices(),
+                                              default=STATUS.initial)
+            ...
 
     Second choice can be referred as Payment.STATUS.success throughout
-    the code, equals to 2.
+    the code, equals to 200.
     """
     def __init__(self, **defs):
         """
-        Takes the dictionary, where keys are short names and values
+        Takes the dictionary, where keys are identifiers and values
         are tuples (db id, human value).
         """
         if [True for k in defs if k.startswith('_')]:
@@ -46,13 +49,13 @@ class Choices:
 
     def get(self, name, default=None):
         """
-        Example: Choices(...).get('success') -> 2
+        Example: Choices(...).get('success') -> 200
         """
         return self.defs.get(name, (default,))[0]
 
     def __getattr__(self, name):
         """
-        Example: Choices(...).success -> 2
+        Example: Choices(...).success -> 200
         """
         if name.startswith('_'):
             raise AttributeError("No attribute %s in Choices class" % name)
@@ -60,13 +63,13 @@ class Choices:
 
     def name_of(self, what):
         """
-        Example: name_of(2) -> 'success'
+        Example: name_of(200) -> 'success'
         """
         return self.names[what]
 
     def text_of(self, what):
         """
-        Example: text_of(2) -> 'Paid OK'
+        Example: text_of(200) -> "Paid OK"    # note: a gettext string
         """
         return self.texts[what]
 
@@ -102,7 +105,7 @@ def create_choices_tests(klass):
         class Payment:
              # see the docstring of Choices class for details
 
-    this is then possible::
+    so this is possible::
 
         p = Payment(status=Payment.STATUS.initial)
         if p.is_status_initial:
