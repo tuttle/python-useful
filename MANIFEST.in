@@ -1,0 +1,9 @@
+include MANIFEST.in
+include README.md
+include setup.py
+include LICENSE
+
+recursive-include useful *
+
+global-exclude *.pyc
+global-exclude *.pyo
