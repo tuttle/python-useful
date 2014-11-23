@@ -21,8 +21,8 @@ setup(
     zip_safe=False,
 
     classifiers=[
-        "Development Status :: 4 - Beta",
-        "Environment :: WWW",
+        "Development Status :: 5 - Production/Stable",
+        "Environment :: Web Environment",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: BSD License",
         "Operating System :: OS Independent",
