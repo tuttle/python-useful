@@ -23,19 +23,19 @@ in the docstring of each utility.
 Installation
 ------------
 
-Install using pip::
+Install either using pip::
 
-    $ pip install useful
+    pip install useful
 
-Or using e-i:
+Or using e-i::
 
-    $ easy_install useful
+    easy_install useful
 
 Or from source::
 
-    $ git clone https://github.com/tuttle/python-useful src/useful
-    $ cd src/useful
-    $ python setup.py develop
+    git clone https://github.com/tuttle/python-useful src/useful
+    cd src/useful
+    python setup.py develop
 
 If you are about to use the Django features like the templatetags,
 you can add to ``INSTALLED_APPS``::
