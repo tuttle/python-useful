@@ -1,5 +1,5 @@
 from os.path import dirname, join
-from setuptools import setup
+from setuptools import setup, find_packages
 
 import useful
 
@@ -9,7 +9,7 @@ with open(join(dirname(__file__), 'README.md')) as readme_file:
 setup(
 	name='useful',
 	version=useful.__versionstr__,
-	packages=('useful',),
+	packages=find_packages(),
 	package_data={'useful': ['django/locale/cs/LC_MESSAGES/django.*']},
 	description="Everyday use utilities for writing Python code or Django projects.",
 	long_description=long_description,
