@@ -11,7 +11,7 @@ setup(
 	version=useful.__versionstr__,
 	packages=('useful',),
 	package_data={'useful': ['django/locale/cs/LC_MESSAGES/django.*']},
-	description="Everyday use utilities for writing Python/Django apps",
+	description="Everyday use utilities for writing Python code or Django projects.",
 	long_description=long_description,
 	author="Vlada Macek",
 	author_email="macek@sandbox.cz",
@@ -22,7 +22,6 @@ setup(
 
     classifiers=[
         "Development Status :: 5 - Production/Stable",
-        "Environment :: Web Environment",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: BSD License",
         "Operating System :: OS Independent",
