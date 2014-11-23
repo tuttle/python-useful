@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 import useful
 
-with open(join(dirname(__file__), 'README.md')) as readme_file:
+with open(join(dirname(__file__), 'README.rst')) as readme_file:
     long_description = readme_file.read()
 
 setup(
