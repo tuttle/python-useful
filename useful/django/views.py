@@ -84,11 +84,11 @@ class JsonResponse(HttpResponse):
     """
     Returns JSON encoded object as HTTP response.
     """
-    def __init__(self, response_data, indent=None, ensure_ascii=False, **kwargs):
+    def __init__(self, response_data, indent=2, ensure_ascii=False, **kwargs):
         import json
 
         kwargs['content'] = json.dumps(response_data, indent=indent, ensure_ascii=ensure_ascii)
-        kwargs['mimetype'] = 'application/json'
+        kwargs['content_type'] = 'application/json; charset=UTF-8'
         super(JsonResponse, self).__init__(**kwargs)
 
 
