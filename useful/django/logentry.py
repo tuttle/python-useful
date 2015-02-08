@@ -27,17 +27,17 @@ class UILogEntry(object):
             user = UserModel.objects.only('id').get(username='admin')
         self.user = user
 
-    def log_addition(self, object, message='UI'):
+    def log_addition(self, object_, message='UI'):
         """
-        Adds a LogEntry recording that the object was added.
+        Adds a LogEntry recording that the object_ was added.
         The change detail message defaults to 'UI' to denote the change
         did not originate from admin interface.
         """
-        self.do_log(object, ADDITION, message)
+        self.do_log(object_, ADDITION, message)
 
-    def log_change(self, object, message='UI', form=None):
+    def log_change(self, object_, message='UI', form=None):
         """
-        Adds a LogEntry recording that the object was changed.
+        Adds a LogEntry recording that the object_ was changed.
         If clean form given, the list of changed fields is added to message.
         The change detail message defaults to 'UI' to denote the change
         did not originate from admin interface.
@@ -47,15 +47,15 @@ class UILogEntry(object):
                 message += ' '
             message += self.construct_change_message(form)
 
-        self.do_log(object, CHANGE, message)
+        self.do_log(object_, CHANGE, message)
 
-    def log_deletion(self, object, message='UI'):
+    def log_deletion(self, object_, message='UI'):
         """
-        Adds a LogEntry recording that the object was deleted.
+        Adds a LogEntry recording that the object_ was deleted.
         The change detail message defaults to 'UI' to denote the change
         did not originate from admin interface.
         """
-        self.do_log(object, DELETION, message)
+        self.do_log(object_, DELETION, message)
 
     def construct_change_message(self, form):
         change_message = []
@@ -66,12 +66,12 @@ class UILogEntry(object):
         change_message = u' '.join(change_message)
         return unicode(change_message or _('No fields changed.'))
 
-    def do_log(self, object, action_flag, message):
+    def do_log(self, object_, action_flag, message):
         LogEntry.objects.log_action(
             user_id         = self.user.pk,
-            content_type_id = ContentType.objects.get_for_model(object).pk,
-            object_id       = object.pk,
-            object_repr     = force_unicode(object),
+            content_type_id = ContentType.objects.get_for_model(object_).pk,
+            object_id       = object_.pk,
+            object_repr     = force_unicode(object_),
             action_flag     = action_flag,
             change_message  = unicode(message))
 

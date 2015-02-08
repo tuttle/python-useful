@@ -10,6 +10,7 @@ from django.utils.http import urlquote_plus as django_urlquote_plus
 
 register = template.Library()
 
+
 @register.simple_tag
 def querydict_set(querydict, param_name, param_value):
     """
@@ -53,6 +54,7 @@ def getfrom(key, mapping):
 
 
 INTSPACE_RE = re.compile(r'^(-?\d+)(\d{3})')
+
 
 @register.filter(is_safe=True)
 def intspace(value):

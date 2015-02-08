@@ -1,5 +1,6 @@
 from django.db import connection
 
+
 def truncate_table(model_or_tablename, cascade=False, cursor=None):
     if cursor is None:
         cursor = connection.cursor()

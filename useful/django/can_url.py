@@ -7,6 +7,7 @@ from django.utils.functional import memoize
 
 _all_callbacks = {}     # caches the callbacks dicts per URLconf
 
+
 def get_all_callbacks(urlconf):
     """
     Gets the dict translating the view names to view callables for the entire

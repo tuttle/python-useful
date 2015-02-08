@@ -1,7 +1,7 @@
 from functools import wraps
 import hashlib
 
-from django.core import cache # Importing this way so debug_toolbar can patch it later.
+from django.core import cache  # Importing this way so debug_toolbar can patch it later.
 from django.core.cache.backends.base import DEFAULT_TIMEOUT
 
 
@@ -55,7 +55,7 @@ def cached_function(func=None, num_args_to_key=None, timeout=DEFAULT_TIMEOUT):
 
             unallowed_types = set(map(type, key_args)) - ALLOWED_CACHED_FUNCTION_ARG_TYPES
             if unallowed_types:
-                raise RuntimeError("cached_function received unallowed types of keyable args: %s" \
+                raise RuntimeError("cached_function received unallowed types of keyable args: %s"
                                    % ', '.join(map(str, unallowed_types)))
 
             key_fmt = 'cached_function:%s.%s(%%s)' % (func.__module__, func.__name__)

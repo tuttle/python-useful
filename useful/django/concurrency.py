@@ -43,9 +43,9 @@ def _clean_object_version(slf):
         db_obj = slf._meta.model.objects.get(pk=pk)
         db_hash = _gen_object_hash(db_obj)
         if form_hash != db_hash:
-            slf.concurrency_problem = _("In the mean time, someone "
-                                        "<b>changed</b> this item in the database.") + ' ' \
-                                      + unicode(slf._CONCURRENCY_EDIT_MESSAGE)
+            slf.concurrency_problem = \
+                _("In the mean time, someone <b>changed</b> this item in the database.") \
+                + ' ' + unicode(slf._CONCURRENCY_EDIT_MESSAGE)
 
     if slf.concurrency_problem:
         errors = slf._errors.setdefault(forms.forms.NON_FIELD_ERRORS,
@@ -138,10 +138,10 @@ class ConcurrencyProtectionUserChangeForm(UserChangeForm):
     _CONCURRENCY_EDIT_MESSAGE = CONCURRENCY_EDIT_MESSAGE
 
 
-def _gen_hmac(pk, hash):
+def _gen_hmac(pk, hash_):
     pk = smart_unicode(pk).encode('UTF-8')
-    hash = smart_unicode(hash).encode('UTF-8')
-    return salted_hmac('concurrency prot', '%s %s' % (pk, hash)).hexdigest()
+    hash_ = smart_unicode(hash_).encode('UTF-8')
+    return salted_hmac('concurrency prot', '%s %s' % (pk, hash_)).hexdigest()
 
 
 def _gen_object_hash(obj):
@@ -162,8 +162,8 @@ def _gen_object_version(obj):
     if obj.pk is None:
         return ''
 
-    hash = _gen_object_hash(obj)
-    return u'%s-%s-%s' % (obj.pk, hash, _gen_hmac(obj.pk, hash))
+    hash_ = _gen_object_hash(obj)
+    return u'%s-%s-%s' % (obj.pk, hash_, _gen_hmac(obj.pk, hash_))
 
 
 def _validate_object_version(datadict):

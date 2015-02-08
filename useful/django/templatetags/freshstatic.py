@@ -11,6 +11,7 @@ register = template.Library()
 
 STATIC_URL_CACHE = {}
 
+
 @register.simple_tag
 def freshstatic(path):
     """

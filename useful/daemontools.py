@@ -9,6 +9,7 @@ import atexit
 # For becoming the daemon django.utils.daemonize.become_daemon() is used.
 # The additional daemon-stuff utilities follow:
 
+
 def drop_privileges(user='nobody', group='nogroup'):
     """
     Drop privileges if we're superuser by changing UID/GID to given user/group.
@@ -42,8 +43,8 @@ def install_termination_logging_signal_handlers():
     ignorables). On signal, the event is logged and process is terminated.
     """
     def sig_handler(signum, unused_frame):
-        signames = [ n for n,v in signal.__dict__.iteritems()
-                       if n.startswith('SIG') and v==signum ]
+        signames = [n for n,v in signal.__dict__.iteritems()
+                    if n.startswith('SIG') and v == signum]
         signame = signames and ' (%s)' % signames[0] or ''
         logging.info("Terminating with signal %d%s." % (signum, signame))
         sys.exit(2)     # calls exit_function

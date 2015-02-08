@@ -32,8 +32,7 @@ class VerifiedHTTPSConnection(httplib.HTTPSConnection):
     def connect(self):
         # overrides the version in httplib so that we do
         #    certificate verification
-        sock = socket.create_connection(
-                    (self.host, self.port), self.timeout)
+        sock = socket.create_connection((self.host, self.port), self.timeout)
         if self._tunnel_host:
             self.sock = sock
             self._tunnel()

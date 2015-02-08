@@ -118,7 +118,7 @@ def protected_redirect(request):
         return HttpResponseBadRequest("Bad parameters or protection fault.")
 
 
-def serve_with_Expires(request, path, cache_timeout=365*24*60*60):
+def serve_with_Expires(request, path, cache_timeout=365 * 24 * 60 * 60):
     """
     This view can be used in the development server to add the Expires
     header on the static files protected by the modtime change detection
