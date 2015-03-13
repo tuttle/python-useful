@@ -109,6 +109,10 @@ class FileLock(object):
             except ValueError:
                 # We don't steal if the lockfile is empty of contains an invalid JSON value.
                 pass
+            except IOError, e:
+                # We ignore when the lockfile was removed between the exclusive open and load.
+                if e.errno != errno.ENOENT:
+                    raise
             else:
                 try:
                     # POSIX test whether the given PID exists
