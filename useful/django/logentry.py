@@ -68,12 +68,12 @@ class UILogEntry(object):
 
     def do_log(self, object_, action_flag, message):
         LogEntry.objects.log_action(
-            user_id         = self.user.pk,
-            content_type_id = ContentType.objects.get_for_model(object_).pk,
-            object_id       = object_.pk,
-            object_repr     = force_unicode(object_),
-            action_flag     = action_flag,
-            change_message  = unicode(message))
+            user_id=self.user.pk,
+            content_type_id=ContentType.objects.get_for_model(object_).pk,
+            object_id=object_.pk,
+            object_repr=force_unicode(object_),
+            action_flag=action_flag,
+            change_message=unicode(message))
 
     def save_form_instance_and_log(self, form):
         """

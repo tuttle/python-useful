@@ -166,7 +166,8 @@ class UrlPatterns(list):
             else:
                 compiled_anded_perms = self.compile_perms(perms)
 
-                __can_url = lambda user: self._can_url(compiled_anded_perms, user)
+                def __can_url(user):
+                    return self._can_url(compiled_anded_perms, user)
 
                 _wrapped = self.user_passes_test(__can_url)(view_func)
                 _wrapped.can_url_func = __can_url
@@ -198,7 +199,7 @@ class UrlPatterns(list):
                 perm, unused, alias = m.groups()
                 yield perm, alias or True
 
-        return [ tuple(comp(ored_perms)) for ored_perms in perms ]
+        return [tuple(comp(ored_perms)) for ored_perms in perms]
 
     def user_passes_test(self, test_func):
         """

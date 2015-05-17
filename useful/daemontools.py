@@ -43,7 +43,7 @@ def install_termination_logging_signal_handlers():
     ignorables). On signal, the event is logged and process is terminated.
     """
     def sig_handler(signum, unused_frame):
-        signames = [n for n,v in signal.__dict__.iteritems()
+        signames = [n for n, v in signal.__dict__.iteritems()
                     if n.startswith('SIG') and v == signum]
         signame = signames and ' (%s)' % signames[0] or ''
         logging.info("Terminating with signal %d%s." % (signum, signame))

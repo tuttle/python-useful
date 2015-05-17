@@ -154,21 +154,46 @@ def paginate(request, objects, per_page=20):
         <div class="paginate">
             <ul>
                 {% if objs.has_previous %}
-                <li class="first"><a href="?{% querydict_set request.GET 'page' 1 %}" title="{% trans "First page" %}">&lt;&lt;</a></li>
-                <li><a href="?{% querydict_set request.GET 'page' objs.previous_page_number %}" title="{% trans "Previous page" %}">&lt;</a></li>
+                    <li class="first">
+                        <a href="?{% querydict_set request.GET 'page' 1 %}" title="{% trans "First page" %}">
+                            &lt;&lt;
+                        </a>
+                    </li>
+                    <li>
+                        <a href="?{% querydict_set request.GET 'page' objs.previous_page_number %}"
+                            title="{% trans "Previous page" %}">
+                            &lt;
+                        </a>
+                    </li>
                 {% endif %}
 
                 {% for page in objs.paginator.page_range %}
-                <li {% ifequal objs.number page %}class="active"{% endifequal %}>
-                    <a href="?{% querydict_set request.GET 'page' page %}" title="{% trans "Jump to page">{{ page }}</a>
-                </li>
+                    <li {% ifequal objs.number page %}class="active"{% endifequal %}>
+                        <a href="?{% querydict_set request.GET 'page' page %}" title="{% trans "Jump to page">
+                            {{ page }}
+                        </a>
+                    </li>
                 {% endfor %}
 
-                <span class="current">{% blocktrans with objs.number as num and objs.paginator.num_pages as total %}Page {{ num }} of {{ total }}{% endblocktrans %}</span>
+                <span class="current">
+                    {% blocktrans with objs.number as num and objs.paginator.num_pages as total %}
+                        Page {{ num }} of {{ total }}
+                    {% endblocktrans %}
+                </span>
 
                 {% if objs.has_next %}
-                <li><a href="?{% querydict_set request.GET 'page' objs.next_page_number %}" title="{% trans "Next page" %}">&gt;</a></li>
-                <li class="last"><a href="?{% querydict_set request.GET 'page' objs.paginator.num_pages %}" title="{% trans "Last page" %}">&gt;&gt;</a></li>
+                    <li>
+                        <a href="?{% querydict_set request.GET 'page' objs.next_page_number %}"
+                            title="{% trans "Next page" %}">
+                            &gt;
+                        </a>
+                    </li>
+                    <li class="last">
+                        <a href="?{% querydict_set request.GET 'page' objs.paginator.num_pages %}"
+                            title="{% trans "Last page" %}">
+                            &gt;&gt;
+                        </a>
+                    </li>
                 {% endif %}
             </ul>
         </div>
