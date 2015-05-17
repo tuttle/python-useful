@@ -94,6 +94,15 @@ def can_url_processor(request):
     A context processor adding the template helper for querying view-level
     permissions like this::
 
+        ### settings.py
+
+        TEMPLATE_CONTEXT_PROCESSORS += (
+            ...
+            'useful.django.can_url.can_url_processor',
+        )
+
+        ### in some template.html
+
         {% if can_url.view_name %}
             <a href="{% url 'view_name' %}">...</a>
         {% endif %}

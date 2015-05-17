@@ -16,15 +16,20 @@ from django.utils.encoding import force_str
 
 class UrlPatterns(list):
     """
-    Offers to create the standard urlpatterns in views.py instead of in urls.py
-    and supports DRY by allowing to not reference the view name and not define
-    the URL name (it can be automatically set by the name of the view func).
-    The URL patterns are then closer to the views.
+    Offers to create the standard urlpatterns in views.py instead of in urls.py and supports DRY
+    by allowing to not reference the view name and not define the URL name (it can be
+    automatically set by the name of the view func). The URL patterns are then closer to the views.
 
-    NOTE: As it adds the view to the URLConf, this is the last (outermost) decorator
-          to change the view behavior!
+    IMPORTANT::
+
+        As it appends the view to the URLConf, this is the last (outermost) decorator
+        able to change the view behavior!
 
     Example::
+
+        ### views.py (your exams/urls.py is no more)
+
+        from useful.django.urlpatterns import UrlPatterns
 
         urlpatterns = UrlPatterns()
 
@@ -32,7 +37,7 @@ class UrlPatterns(list):
         def exams_list(request):
             ...
 
-    In project root urls.py::
+    In project *root* urls.py::
 
         url(r'^exams/', include('myproject.apps.exams.views')),
 
@@ -43,28 +48,50 @@ class UrlPatterns(list):
     Permissions:
 
     Also this class supports unification in permission definition and reference.
-    Until now, every time you wanted to test whether any view is linkable,
+
+    Until now, every time you wanted to test whether the user can see the link to the view,
     you had to test for the same set of conditions the view was decorated with.
 
-    That is not very DRY. `can_url' function and `can_url_processor' offer
-    to define even the complex set of permissions only once. All references
-    only use the view spec usually used in the {% url %} tag.
+    That is not very DRY.
+
+    `can_url' function and `can_url_processor' offer to define even the complex set of permissions
+    only once.  All references only use the view spec usually used in the {% url %} tag.
 
     Example::
+
+        ### models.py
+        ...
+        class Meta:
+            verbose_name = _("Exam")
+            verbose_name_plural = _("Exams")
+            permissions = (
+                ('see_listing', "Can see the listing of exams"),
+            )
+
+        ### views.py
 
         @urlpatterns.url(r'^list/$', perms='exams.see_listing')
         def exams_list(request):
             ...
 
-    Now in template, to test whether the user can access the view::
+    Now in template, to *test whether the user can access the view*::
+
+        ### settings.py
+
+        TEMPLATE_CONTEXT_PROCESSORS += (
+            ...
+            'useful.django.can_url.can_url_processor',
+        )
+
+        ### in some template.html
 
         {% if can_url.exams_list %}
             <a href="{% url 'exams_list' %}">...</a>
         {% endif %}
 
-    Alternative: {% if 'namespace:exams_list' in can_url %} ...
+    Alternatively as dict: {% if 'namespace:exams_list' in can_url %} ...
 
-    Allowed forms of perm definition::
+    Allowed forms of perm definition in the decorator::
 
         perms='PERM1'                     # the permission must be present
         perms=('PERM1', 'PERM2')          # all these perms must be present
@@ -79,22 +106,50 @@ class UrlPatterns(list):
         'is_superuser'
             - these are tests for appropriate attribute of the user
 
-        'app_name.perm_name'  - if the dot ('.') is present,
-                                user.has_perm is called to test
+        'app_name.perm_name'
+            - if the dot ('.') is present, user.has_perm() is called to test
 
-        Otherwise user.has_module_perms is called (that usually tests whether
-        the user has any permission for the given app.
+        Otherwise user.has_module_perms() is called (that usually tests whether
+        the user has any permission for the given app).
+
+    Consider these permissions::
+
+        ### models.py
+        ...
+        class Meta:
+            permissions = (
+                ('see_own_exams',  "Can SEE OWN submitted exams only"),
+                ('see_all_exams',  "Can SEE ALL submitted exams"),
+            )
 
     Each PERM can also be followed by its alias in parentheses::
 
-        @urlpatterns.url(r'^list/$',
-                         perms='exams.see_own_exams | exams.see_all_exams (can_all)')
+        ### views.py
+
+        @urlpatterns.url(r'^list/$', perms='exams.see_own_exams | exams.see_all_exams (can_all)')
         def exams_list(request, can_all=False):
             ...
+            exams = Exam.objects.all()
+
+            if can_all and request.GET.get('showall'):
+                messages.info(request, _("The list of exams of all users."))
+            else:
+                exams = exams.filter(user=request.user)
+                messages.info(request, _("The list of your past exams."))
+            ...
+            context['can_all'] = can_all  # can be useful in rendered template
 
     It is required for the view to accept an optional argument can_all that
     is True only when possessing the exams.see_all_exams and can be helpful
     in further DRYing the view behavior.
+
+    It's also easy to indirectly test for permission in Python like you do in template::
+
+        from useful.django.can_url import can_url
+
+        return HttpResponseRedirect(reverse('exams_list') if can_url(request.user, 'exams_list')
+                                    else '/')
+
     """
     # Note: Python 3 will allow all Unicode letters and digits in its identifiers.
     PERM_RE = r'\s*([a-zA-Z_][\w.]*)\s*(\(\s*([a-zA-Z_]\w*)\s*\))?\s*'
