@@ -17,6 +17,15 @@ class AttrDict(dict):
 
     __getattr__ = dict.__getitem__
 
+    def __getstate__(self):
+        return self.__dict__.copy()
+
+    def __setstate__(self, items):
+        self.__dict__.update(items)
+
+    def __repr__(self):
+        return "%s(%s)" % (self.__class__.__name__, dict.__repr__(self))
+
 
 try:
     from collections import OrderedDict
