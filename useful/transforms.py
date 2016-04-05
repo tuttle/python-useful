@@ -1,4 +1,5 @@
 from collections import defaultdict
+import itertools
 import operator
 
 
@@ -73,3 +74,34 @@ def iter_compare_dicts(dict1, dict2, only_common_keys=False, comparison_op=opera
             yield key, (dict1[key], Ellipsis)
         for key in (keyset2 - keyset1):
             yield key, (Ellipsis, dict2[key])
+
+
+def iter_ibatches(iterable, size):
+    """
+    http://code.activestate.com/recipes/303279-getting-items-in-batches/
+
+    Generates iterators of elements of fixed size from the source iterable. Does not create batch sequences in memory.
+    The source iterable can be of an unknown arbitrary length, does not need to support anything else than iteration.
+    itertools.islice provides a size-bounded iterator over the given iterator.
+
+    To know when we're done batching is the tricky part, as islice is happy to continue returning empty iterators
+    on source exhaustion. We never want to yield an empty iterator. So we try to consume each batch a bit, which
+    possibly raises StopIteration stopping the generator function itself.
+
+    WARNING:
+    Each batch must be entirely consumed before proceeding to the next one, otherwise you will get unexpected behaviour!
+
+    >>> for b in iter_ibatches(xrange(55), 10):
+    ...     print tuple(b)
+    (0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
+    (10, 11, 12, 13, 14, 15, 16, 17, 18, 19)
+    (20, 21, 22, 23, 24, 25, 26, 27, 28, 29)
+    (30, 31, 32, 33, 34, 35, 36, 37, 38, 39)
+    (40, 41, 42, 43, 44, 45, 46, 47, 48, 49)
+    (50, 51, 52, 53, 54)
+
+    """
+    it = iter(iterable)
+    while True:
+        batch_it = itertools.islice(it, size)
+        yield itertools.chain([batch_it.next()], batch_it)
