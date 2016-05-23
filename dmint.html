@@ -70,7 +70,7 @@
 			</li>
 			<li class="comment">These preferences are remembered in a cookie.</li>
 		</ul>
-		<p><strong>Supported field types:</strong> bo boz in inz ch chz tx txz dt dtz dd ddz fk fkz mm mmz</p>
+		<p><strong>Supported field types:</strong> bo boz in inz ch chz tx txz dt dtz dd ddz fk fkz mm mmz js</p>
 
 		<div class="nowrap"><textarea onKeyUp="compute()" name="src" rows="60" cols="40">
 Category
@@ -83,6 +83,7 @@ fk category
 dt posted_at
 txz body
 in score
+js details
 </textarea>
 		<span style="vertical-align: top; font-size: 30px">&rarr;</span>
 		<pre id="dst-container"><code id="dst_code" class="python">Code</code></pre>
@@ -220,6 +221,11 @@ function compute() {
 					if (lt[0][2] == 'z') oM += 'blank=True, null=True';
 					oM += ')\n';
 					break;
+			  case 'js':	oI = 'from django.contrib.postgres.fields import JSONField\n' + oI;
+					oM += '    ' + fld + ' = JSONField(';
+					if (verb) oM += fldh;
+					oM += ')\n';
+					break
 			  case 'fk':    oM += '    ' + fld + ' = models.ForeignKey(' + camelize(fld);
 					if (verb) oM += ', verbose_name=' + fldh;
 					if (lt[0][2] == 'z') oM += ', blank=True, null=True';
