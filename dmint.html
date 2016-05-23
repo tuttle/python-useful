@@ -177,13 +177,19 @@ function compute() {
 	for (i=0; i<blocks.length; i++) {
 		if (!blocks[i]) continue;
 		var j, lines = blocks[i].split(/\r?\n/);
-		oM += 'class ' + lines[0] + '(' + base + '):\n';
-		oMN.push(lines[0]);
+		var lt = lines[0].split(/\s*#/);
+		var cls = lt[0];
+		oM += 'class ' + cls + '(' + base + '):';
+		if (lt[1]) oM += '  #' + lt[1];
+		oM += '\n';
+		oMN.push(cls);
 		oAL = new Array();
-		oAR += 'admin.site.register(' + lines[0] + ', ' + lines[0] + 'Admin)\n';
+		oAR += 'admin.site.register(' + cls + ', ' + cls + 'Admin)\n';
 
 		for (j=1; j<lines.length; j++) {
-			var lt = lines[j].split(' ');
+			var lt = lines[j].split(/\s*#/);
+			var eol = lt[1] ? (')  #' + lt[1] + '\n') : ')\n';
+			lt = lt[0].split(' ');
 			if (!lt[0]) continue;
 			var fld = lt[1] || '';
 			var cmd = lt[0].slice(0,2).toLowerCase();
@@ -195,42 +201,43 @@ function compute() {
 			  case 'ch':	oM += '    ' + fld + ' = models.CharField(';
 					if (verb) oM += fldh + ', ';
 					if (lt[0][2] == 'z') oM += 'blank=True, ';
-					oM += 'max_length=255)\n';
+					oM += 'max_length=255' + eol;
 					break;
 			  case 'tx':	oM += '    ' + fld + ' = models.TextField(';
 					if (verb) oM += fldh;
 					if (verb && (lt[0][2] == 'z')) oM += ', ';
 					if (lt[0][2] == 'z') oM += 'blank=True';
-					oM += ')\n';
+					oM += eol;
 					break;
 			  case 'in':	oM += '    ' + fld + ' = models.IntegerField('
 					if (verb) oM += fldh;
 					if (verb && (lt[0][2] == 'z')) oM += ', ';
 					if (lt[0][2] == 'z') oM += 'blank=True, null=True';
-					oM += ')\n';
+					oM += eol;
 					break;
 			  case 'dt':	oM += '    ' + fld + ' = models.DateTimeField(';
 					if (verb) oM += fldh;
 					if (verb && (lt[0][2] == 'z')) oM += ', ';
 					if (lt[0][2] == 'z') oM += 'blank=True, null=True';
-					oM += ')\n';
+					oM += eol;
 					break;
 			  case 'dd':	oM += '    ' + fld + ' = models.DateField(';
 					if (verb) oM += fldh;
 					if (verb && (lt[0][2] == 'z')) oM += ', ';
 					if (lt[0][2] == 'z') oM += 'blank=True, null=True';
-					oM += ')\n';
+					oM += eol;
 					break;
 			  case 'js':	oI = 'from django.contrib.postgres.fields import JSONField\n' + oI;
 					oM += '    ' + fld + ' = JSONField(';
 					if (verb) oM += fldh;
-					oM += ')\n';
+					oM += eol;
 					break
 			  case 'fk':    oM += '    ' + fld + ' = models.ForeignKey(' + camelize(fld);
 					if (verb) oM += ', verbose_name=' + fldh;
 					if (lt[0][2] == 'z') oM += ', blank=True, null=True';
-					//oM += ", related_name='" + pluralize(uncamelize(lines[0])) + "'";
-					oM += ", on_delete=models.CASCADE|PROTECT|SET()|SET_NULL|SET_DEFAULT|DO_NOTHING)\n";
+					//oM += ", related_name='" + pluralize(uncamelize(cls)) + "'";
+					oM += ', on_delete=models.CASCADE|PROTECT|SET()|SET_NULL|SET_DEFAULT|DO_NOTHING';
+					oM += eol;
 					break;
 			  case 'mm':    oM += '    ' + pluralize(fld) + ' = models.ManyToManyField(' + camelize(fld);
 					if (verb) {
@@ -239,31 +246,32 @@ function compute() {
 						oM += ', verbose_name=' + fldh;
 					}
 					if (lt[0][2] == 'z') oM += ', blank=True';
-					//oM += ", related_name='" + pluralize(uncamelize(lines[0])) + "')
-					oM += ")\n";
+					//oM += ", related_name='" + pluralize(uncamelize(cls)) + "')
+					oM += eol;
 					break;
 			  case 'bo':    oM += '    ' + fld + ' = models.';
 					oM += (lt[0][2] == 'z') ? 'NullBooleanField(' : 'BooleanField(';
 					if (verb) oM += fldh + ', ';
-					oM += "default=False)\n";
+					oM += 'default=False';
+					oM += eol;
 					break;
 			  default:
-					oM += '# line unrecognized: ' + lines[j] + '\n';
+					oM += '# line unrecognized by dmint: ' + lines[j] + '\n';
 			}
 		}
 		oM += '\n';
 		if (verb == 'gettext') {
-			var hc = humanize_class(lines[0]);
+			var hc = humanize_class(cls);
 			oM += '    class Meta:\n';
 			oM += '        verbose_name = _("' + hc + '")\n';
 			oM += '        verbose_name_plural = _("' + pluralize(hc) + '")\n';
 		} else {
 			oM += '#    class Meta:\n';
 		}
-		oM += '#        unique_together = ()\n';
-		oM += '#        index_together = ()\n\n';
+		oM += '        # unique_together = ()\n';
+		oM += '        # index_together = ()\n\n';
 
-		oA += 'class ' + lines[0] + "Admin(admin.ModelAdmin):\n";
+		oA += 'class ' + cls + "Admin(admin.ModelAdmin):\n";
 		oA += '    list_display = (';
 		if (base == 'TimeStampedModel') oA += "'created', ";
 		if (oAL && oAL.length) {
