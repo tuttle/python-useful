@@ -40,6 +40,11 @@ except ImportError:
 else:
     UserModel = get_user_model()
 
+try:
+    from django.utils.deprecation import MiddlewareMixin
+except ImportError:  # Django < 1.10
+    MiddlewareMixin = object
+
 CACHE_KEY = 'cached_auth_middleware_1.5:%s'
 
 try:
@@ -83,7 +88,7 @@ def get_cached_user(request):
     return request._cached_user
 
 
-class CachedAuthenticationMiddleware(object):
+class CachedAuthenticationMiddleware(MiddlewareMixin):
     """
     A drop-in replacement for django.contrib.auth's built-in
     AuthenticationMiddleware. It tries to populate request.user by fetching
@@ -93,12 +98,13 @@ class CachedAuthenticationMiddleware(object):
     settings.MIDDLEWARE_CLASSES can be replaced with
     'useful.django.cached_auth.CachedAuthenticationMiddleware'.
     """
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         post_save.connect(invalidate_cache, sender=UserModel)
         post_delete.connect(invalidate_cache, sender=UserModel)
         if profile_model:
             post_save.connect(invalidate_cache, sender=profile_model)
             post_delete.connect(invalidate_cache, sender=profile_model)
+        super(CachedAuthenticationMiddleware, self).__init__(*args, **kwargs)
 
     def process_request(self, request):
         assert hasattr(request, 'session'), \
