@@ -3,10 +3,10 @@ import time
 import functools
 
 import django
+from django import shortcuts
 from django.conf import settings
 from django.core.paginator import Paginator, EmptyPage, InvalidPage
 from django.core.urlresolvers import reverse
-from django.shortcuts import render_to_response
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest
 from django.template import RequestContext
 
@@ -75,9 +75,9 @@ def page(template=None, **decorator_args):
                 context_instance = data.get('context') or RequestContext(request)
 
                 # Render the template.
-                response = render_to_response(template_name, data, context_instance)
+                response = shortcuts.render_to_response(template_name, data, context_instance)
                 return response
-            return render(
+            return shortcuts.render(
                 request,
                 template_name,
                 context=data
