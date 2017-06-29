@@ -2,10 +2,11 @@ import os
 import time
 import functools
 
+import django
+from django import shortcuts
 from django.conf import settings
 from django.core.paginator import Paginator, EmptyPage, InvalidPage
 from django.core.urlresolvers import reverse
-from django.shortcuts import render_to_response
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest
 from django.template import RequestContext
 
@@ -68,13 +69,19 @@ def page(template=None, **decorator_args):
                 stn = os.path.splitext(template_name)
                 template_name = stn[0] + '_debug' + stn[1]
 
-            # The view or the decorator call can override the context
-            # instance. Otherwise, use the usual RequestContext.
-            context_instance = data.get('context') or RequestContext(request)
+            if django.VERSION < (1, 10):
+                # The view or the decorator call can override the context
+                # instance. Otherwise, use the usual RequestContext.
+                context_instance = data.get('context') or RequestContext(request)
 
-            # Render the template.
-            response = render_to_response(template_name, data, context_instance)
-            return response
+                # Render the template.
+                response = shortcuts.render_to_response(template_name, data, context_instance)
+                return response
+            return shortcuts.render(
+                request,
+                template_name,
+                context=data
+            )
 
         return page_decorator_inner_wrapper
     return page_decorator_wrapper
