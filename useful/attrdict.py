@@ -60,5 +60,5 @@ else:
             """
             try:
                 return self.__getitem__(name)
-            except KeyError, e:
+            except KeyError as e:
                 raise AttributeError(e)

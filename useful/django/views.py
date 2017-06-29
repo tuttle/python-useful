@@ -19,14 +19,15 @@ class HttpResponseException(Exception):
     to a HttpResponse<Anything>.
     Don't raise this directly, but subclass and raise with http_response attribute.
     """
+    http_response = None
 
 
 class ReverseAndRedirect(HttpResponseException):
     """
     A shortcut allowing to do a reverse, then redirect the user by raising an exception.
     """
-    def __init__(self, viewname, *args, **kwargs):
-        url = reverse(viewname, args=args, kwargs=kwargs)
+    def __init__(self, view_name, *args, **kwargs):
+        url = reverse(view_name, args=args, kwargs=kwargs)
         self.http_response = HttpResponseRedirect(url)
 
 
@@ -48,22 +49,21 @@ def page(template=None, **decorator_args):
 
             try:
                 # Call the original view.
-                d = fn(request, *args, **kw)
-            except HttpResponseException, e:
+                response_dict = fn(request, *args, **kw)
+            except HttpResponseException as e:
                 return e.http_response
 
             # Return now if it returned some kind of HTTP response itself, no job.
-            if isinstance(d, HttpResponse):
-                return d
+            if isinstance(response_dict, HttpResponse):
+                return response_dict
 
-            if d:
-                data.update(d)
+            if response_dict:
+                data.update(response_dict)
 
             # The view can override the template to use.
             template_name = data.get('template',  template)
 
-            # By adding the debug_template parameter we switch to possible
-            # debugging template:
+            # By adding the debug_template parameter we switch to possible debugging template:
             # payments/payments_info.html -> payments/payments_info_debug.html
             if settings.DEBUG and request.GET.get('debug_template'):
                 stn = os.path.splitext(template_name)
@@ -75,14 +75,19 @@ def page(template=None, **decorator_args):
                 context_instance = data.get('context') or RequestContext(request)
 
                 # Render the template.
-                response = shortcuts.render_to_response(template_name, data, context_instance)
-                return response
-            return shortcuts.render(
-                request,
-                template_name,
-                context=data
-            )
+                response = shortcuts.render_to_response(
+                    template_name,
+                    data,
+                    context_instance,
+                )
+            else:
+                response = shortcuts.render(
+                    request,
+                    template_name,
+                    context=data
+                )
 
+            return response
         return page_decorator_inner_wrapper
     return page_decorator_wrapper
 
@@ -208,12 +213,12 @@ def paginate(request, objects, per_page=20):
     paginator = Paginator(objects, per_page)
 
     try:
-        page = int(request.GET.get('page', '1'))
+        page_num = int(request.GET.get('page', '1'))
     except ValueError:
-        page = 1
+        page_num = 1
 
     try:
-        objects = paginator.page(page)
+        objects = paginator.page(page_num)
     except (EmptyPage, InvalidPage):
         objects = paginator.page(paginator.num_pages)
 

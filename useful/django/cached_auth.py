@@ -72,19 +72,22 @@ def get_cached_user(request):
             user = cache.cache.get(key)
         except KeyError:
             user = AnonymousUser()
+        else:
+            if user is None:
+                user = get_user(request)
 
-        if user is None:
-            user = get_user(request)
+                # Try to populate profile cache if profile is installed
+                if profile_model:
+                    try:
+                        user.get_profile()
+                    # Handle exception for user with no profile and AnonymousUser
+                    except (profile_model.DoesNotExist, AttributeError):
+                        pass
 
-            # Try to populate profile cache if profile is installed
-            if profile_model:
-                try:
-                    user.get_profile()
-                # Handle exception for user with no profile and AnonymousUser
-                except (profile_model.DoesNotExist, AttributeError):
-                    pass
-            cache.cache.set(key, user)
+                cache.cache.set(key, user)
+
         request._cached_user = user
+
     return request._cached_user
 
 
@@ -101,9 +104,11 @@ class CachedAuthenticationMiddleware(MiddlewareMixin):
     def __init__(self, *args, **kwargs):
         post_save.connect(invalidate_cache, sender=UserModel)
         post_delete.connect(invalidate_cache, sender=UserModel)
+
         if profile_model:
             post_save.connect(invalidate_cache, sender=profile_model)
             post_delete.connect(invalidate_cache, sender=profile_model)
+
         super(CachedAuthenticationMiddleware, self).__init__(*args, **kwargs)
 
     def process_request(self, request):
@@ -111,4 +116,6 @@ class CachedAuthenticationMiddleware(MiddlewareMixin):
             "The Django authentication middleware requires session middleware to be installed. "\
             "Edit your MIDDLEWARE_CLASSES setting to insert 'django.contrib.sessions.middleware.SessionMiddleware'."
 
-        request.user = SimpleLazyObject(lambda: get_cached_user(request))
+        request.user = SimpleLazyObject(
+            lambda: get_cached_user(request)
+        )
