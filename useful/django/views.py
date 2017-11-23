@@ -7,7 +7,7 @@ from django import shortcuts
 from django.conf import settings
 from django.core.paginator import Paginator, EmptyPage, InvalidPage
 from django.core.urlresolvers import reverse
-from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest
+from django.http.response import HttpResponse, HttpResponseBase, HttpResponseRedirect, HttpResponseBadRequest
 from django.template import RequestContext
 
 from .crypto import SecretTokenGenerator
@@ -54,7 +54,7 @@ def page(template=None, **decorator_args):
                 return e.http_response
 
             # Return now if it returned some kind of HTTP response itself, no job.
-            if isinstance(response_dict, HttpResponse):
+            if isinstance(response_dict, HttpResponseBase):
                 return response_dict
 
             if response_dict:
