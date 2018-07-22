@@ -1,7 +1,9 @@
-from functools import wraps
-import os
-import time
 import errno
+import os
+import sys
+import time
+from functools import wraps
+
 
 # Based on http://www.evanfosmark.com/2009/01/cross-platform-file-locking-support-in-python/
 
@@ -42,6 +44,7 @@ class FileLock(object):
         """
         self.is_locked = False
         self.lockfile = os.path.join(os.getcwd(), "%s.lock" % file_name)
+        self.fd = None
         self.file_name = file_name
         self.timeout = timeout
         self.delay = delay
@@ -74,7 +77,13 @@ class FileLock(object):
                     continue
 
                 if (time.time() - start_time) >= self.timeout:
-                    raise FileLockTimeoutException("%d seconds passed." % self.timeout)
+                    msg = "%d seconds passed." % self.timeout
+                    if self.stealing:
+                        msg += ' Lock file: %s. My argv: %r' % (
+                            open(self.lockfile).read(512),
+                            sys.argv,
+                        )
+                    raise FileLockTimeoutException(msg)
 
                 time.sleep(self.delay)
 
@@ -82,7 +91,6 @@ class FileLock(object):
 
         if self.stealing:
             import datetime
-            import sys
 
             info = {
                 'lock_time': datetime.datetime.now().isoformat(),  # warning: timezone unaware!
@@ -98,7 +106,8 @@ class FileLock(object):
             called at the end.
         """
         if self.is_locked:
-            os.close(self.fd)
+            if self.fd is not None:
+                os.close(self.fd)
             os.unlink(self.lockfile)
             self.is_locked = False
 
@@ -146,13 +155,13 @@ class FileLock(object):
         """
         self.release()
 
-    def __call__(self, function):
+    def __call__(self, func):
         """
         Support for using the instance as decorator. The entire function will be protected.
         """
-        @wraps(function)
+        @wraps(func)
         def inner(*args, **kwargs):
             with self:
-                return function(*args, **kwargs)
+                return func(*args, **kwargs)
 
         return inner
