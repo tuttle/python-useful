@@ -1,10 +1,11 @@
-from django.utils.translation import ugettext_lazy as _
-from django.utils.text import get_text_list
-from django.utils.encoding import force_unicode
-from django.contrib.contenttypes.models import ContentType
-from django.contrib.admin.models import LogEntry, ADDITION, CHANGE, DELETION
 from django.contrib import admin
+from django.contrib.admin.models import ADDITION, CHANGE, DELETION, LogEntry
+from django.contrib.contenttypes.models import ContentType
 from django.template.defaultfilters import capfirst
+from django.utils.encoding import force_text
+from django.utils.safestring import mark_safe
+from django.utils.text import get_text_list
+from django.utils.translation import ugettext_lazy as _
 
 # Django 1.5 swappable model support, backward compatible.
 try:
@@ -71,9 +72,10 @@ class UILogEntry(object):
             user_id=self.user.pk,
             content_type_id=ContentType.objects.get_for_model(object_).pk,
             object_id=object_.pk,
-            object_repr=force_unicode(object_),
+            object_repr=force_text(object_),
             action_flag=action_flag,
-            change_message=unicode(message))
+            change_message=unicode(message),
+        )
 
     def save_form_instance_and_log(self, form):
         """
@@ -110,29 +112,38 @@ class LogEntryAdmin(ReadOnlyModelAdmin):
         admin.site.register(LogEntry, LogEntryAdmin)
     """
     list_display = 'action_time_nolink', 'user', 'table', 'action', 'change_message'
-    list_filter = 'user__is_superuser', 'content_type'
+    list_filter = (
+        'user__is_superuser',
+        ('content_type', admin.RelatedOnlyFieldListFilter),
+    )
     date_hierarchy = 'action_time'
 
     def action_time_nolink(self, obj):
-        return '</a><span style="font-weight: normal">%s</span><a>' \
-            % obj.action_time.strftime('%Y-%m-%d %H:%M:%S')
+        return mark_safe(
+            '</a><span style="font-weight: normal">%s</span><a>' % obj.action_time.strftime('%Y-%m-%d %H:%M:%S')
+        )
     action_time_nolink.allow_tags = True
     action_time_nolink.short_description = _("Action time")
+    action_time_nolink.admin_order_field = 'action_time'
 
     def table(self, obj):
         if obj.content_type_id:
-            m = obj.content_type.model_class()._meta
-            return capfirst(m.verbose_name_plural)
+            cls = obj.content_type.model_class()
+            return capfirst(cls._meta.verbose_name_plural) if cls else obj.content_type
         return ''
     table.short_description = _("Table")
+    table.admin_order_field = 'content_type'
 
     def action(self, obj):
         r = obj.object_repr
         if not obj.is_deletion() and obj.get_admin_url():
             r = '<a href="%s">%s</a>' % (obj.get_admin_url(), r)
-        return '<span class="%s">%s</span>' % (CHTYPES[obj.action_flag], r)
+        return mark_safe(
+            '<span class="%s">%s</span>' % (CHTYPES[obj.action_flag], r)
+        )
     action.allow_tags = True
     action.short_description = _("Action, object")
+    action.admin_order_field = 'object_repr'
 
     def queryset(self, request):
         qs = super(LogEntryAdmin, self).queryset(request)

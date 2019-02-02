@@ -3,14 +3,15 @@ import hashlib
 from django import forms
 from django.utils.translation import ugettext_lazy as _
 from django.utils.safestring import mark_safe
-from django.utils.encoding import smart_unicode
+from django.utils.encoding import smart_text, force_text
 from django.utils.crypto import salted_hmac, constant_time_compare
 from django.contrib.auth.forms import UserChangeForm
 
 
-CONCURRENCY_EDIT_MESSAGE = _("<br><b>WARNING:</b> Your changes are almost LOST now and can't be "
-                             "saved.<br><em>But you still can copy the values out manually "
-                             "now.</em><br>Then you can <a href=''>RELOAD</a> and edit again.")
+CONCURRENCY_EDIT_MESSAGE = _(
+    "<br><b>WARNING:</b> Your changes are almost LOST now and can't be saved.<br><em>But you still can copy the values "
+    "out manually now.</em><br>Then you can <a href=''>RELOAD</a> and edit again."
+)
 
 
 def _clean_object_version(slf):
@@ -36,7 +37,7 @@ def _clean_object_version(slf):
         slf.data = slf.data.copy()    # make the data dict mutable first
         slf.data['object_version'] = ''
 
-    elif form_pk != unicode(pk):
+    elif form_pk != force_text(pk):
         raise RuntimeError(_("Found not matching primary key in object_version field."))
 
     if not slf.concurrency_problem:
@@ -45,11 +46,10 @@ def _clean_object_version(slf):
         if form_hash != db_hash:
             slf.concurrency_problem = \
                 _("In the mean time, someone <b>changed</b> this item in the database.") \
-                + ' ' + unicode(slf._CONCURRENCY_EDIT_MESSAGE)
+                + ' ' + force_text(slf._CONCURRENCY_EDIT_MESSAGE)
 
     if slf.concurrency_problem:
-        errors = slf._errors.setdefault(forms.forms.NON_FIELD_ERRORS,
-                                        forms.util.ErrorList())
+        errors = slf._errors.setdefault(forms.forms.NON_FIELD_ERRORS, forms.utils.ErrorList())
         errors.append(mark_safe(slf.concurrency_problem))
 
 
@@ -139,15 +139,15 @@ class ConcurrencyProtectionUserChangeForm(UserChangeForm):
 
 
 def _gen_hmac(pk, hash_):
-    pk = smart_unicode(pk).encode('UTF-8')
-    hash_ = smart_unicode(hash_).encode('UTF-8')
+    pk = smart_text(pk).encode('UTF-8')
+    hash_ = smart_text(hash_).encode('UTF-8')
     return salted_hmac('concurrency prot', '%s %s' % (pk, hash_)).hexdigest()
 
 
 def _gen_object_hash(obj):
     def get_obj_data():
         for k, v in sorted(forms.models.model_to_dict(obj).items()):
-            yield u'%s=%s' % (smart_unicode(k), smart_unicode(v))
+            yield u'%s=%s' % (smart_text(k), smart_text(v))
 
     data = u' '.join(get_obj_data()).encode('UTF-8')
     return hashlib.sha256(data).hexdigest()

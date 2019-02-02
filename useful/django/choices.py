@@ -1,6 +1,6 @@
 class Choices:
     """
-    Encapsulates the choices definition and conversion, praises the DRY.
+    Encapsulates the choices definition and conversion. Praises the DRY.
 
     Allows for using custom symbols as individual choices, bundles them with i18n-enabled labels
     and stores choices in a way that usually fits more for processing, such as small integers.
@@ -8,57 +8,76 @@ class Choices:
     Example::
 
         class Payment(models.Model):
-            STATUS = Choices(initial      = (100, _("Awaiting Payment")),
-                             success      = (200, _("Paid OK")),
-                             nok_failure  = (300, _("Payment Failed")))
+            STATUSES = Choices(
+                initial      = (100, _("Awaiting Payment")),
+                success      = (200, _("Paid OK")),
+                nok_failure  = (300, _("Payment Failed")),
+            )
             ...
-            status = models.SmallIntegerField(...,
-                                              choices=STATUS.choices(),
-                                              default=STATUS.initial)
+            STATUSES = models.SmallIntegerField(
+                ...,
+                choices=STATUSES.choices(),
+                default=STATUSES.initial,
+            )
             ...
 
-    Second choice can be referred as Payment.STATUS.success throughout
-    the code, equals to 200.
+    Second choice can be referred to as Payment.STATUSES.success throughout the code, equals to 200.
     """
+    reserved_choice_names = {
+        'contribute_to_class',
+    }
+
     def __init__(self, **defs):
         """
-        Takes the dictionary, where keys are identifiers and values
-        are tuples (db id, human value).
+        Takes the dictionary, where keys are identifiers and values are tuples (db id, text).
         """
-        if [True for k in defs if k.startswith('_')]:
-            raise RuntimeError("Programming error: Names starting with "
-                               "underscore are not allowed in Choices.")
+        if any(k.startswith('_') for k in defs):
+            raise ValueError("Names started by _ are not allowed in Choices.")
+
+        unallowed = set(defs) & self.reserved_choice_names
+        if unallowed:
+            raise ValueError("Not allowed choice names defined: %s" % ', '.join(unallowed))
+
         self.defs = defs
-        self.names = dict((v[0], k) for k, v in defs.iteritems())
+        self.names = {v[0]: k for k, v in defs.items()}
         self.texts = dict(defs.values())
-        if len(set(self.names.keys())) != len(defs):
-            raise RuntimeError("Programming error: Duplicate choices defined!")
+
+        if len(set(self.names)) != len(defs):
+            raise ValueError("Duplicate choices defined.")
 
     def __add__(self, other):
         """
-        Support for Choices(...) + Choices(...)
+        Support for Choices(...) + Choices(...) by shallow copy.
         """
         defs = self.defs.copy()
         defs.update(other.defs)
         return Choices(**defs)
 
     def choices(self):
-        ch = self.defs.values()
-        ch.sort(lambda x, y: cmp(x[0], y[0]))
+        ch = list(
+            self.defs.values()
+        )
+        ch.sort(
+            key=lambda x: x[0],
+        )
         return ch
 
     def get(self, name, default=None):
         """
         Example: Choices(...).get('success') -> 200
         """
-        return self.defs.get(name, (default,))[0]
+        return self.defs.get(
+            name,
+            (default,)
+        )[0]
 
     def __getattr__(self, name):
         """
         Example: Choices(...).success -> 200
         """
-        if name.startswith('_'):
-            raise AttributeError("No attribute %s in Choices class" % name)
+        if name.startswith('_') or name in self.reserved_choice_names:
+            raise AttributeError("No such attribute %r in Choices class." % name)
+
         return self.defs[name][0]
 
     def name_of(self, what):
@@ -69,13 +88,13 @@ class Choices:
 
     def text_of(self, what):
         """
-        Example: text_of(200) -> "Paid OK"    # note: a gettext string
+        Example: text_of(200) -> "Paid OK"
         """
         return self.texts[what]
 
     def tuples(self):
         """
-        Generates tuples (db id, short name, human name).
+        Generates tuples (db id, short name, text).
         """
         for k, v in self.defs.items():
             # Enforcing i18n by unicode()
@@ -87,38 +106,8 @@ class Choices:
         """
         if not isinstance(keys, (list, tuple)):
             keys = [keys]
-        return Choices(**dict((k, self.defs[k])
-                       for k in keys if k in self.defs))
 
-    def sql_case_ids_to_names(self, field_name):
-        whens = ["WHEN %d THEN '%s'" % (v[0], k) for k, v in self.defs.items()]
-        return "CASE %s %s ELSE '?' END" % (field_name, ' '.join(whens))
-
-
-def create_choices_tests(klass):
-    """
-    Decorator adds is_<choiceset name>_<choice> properties to class
-    for all Choices instances inside.
-    For example::
-
-        @create_choices_tests
-        class Payment:
-             # see the docstring of Choices class for details
-
-    so this is possible::
-
-        p = Payment(status=Payment.STATUS.initial)
-        if p.is_status_initial:
-            (it's true)
-    """
-    for chname, attr in klass.__dict__.items():
-        if isinstance(attr, Choices):
-            for name in attr.defs:
-                fn = 'is_%s_%s' % (chname.lower(), name)
-                if hasattr(klass, fn):
-                    raise RuntimeError("create_choices_tests: Attribute %s.%s "
-                                       "already exists." % (klass.__name__, fn))
-                f = eval("lambda slf: slf.%s == slf.%s.%s" % (chname.lower(),
-                                                              chname, name))
-                setattr(klass, fn, property(f))
-    return klass
+        return Choices(
+            **dict((k, self.defs[k])
+                   for k in keys if k in self.defs)
+        )

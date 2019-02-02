@@ -3,7 +3,7 @@ import re
 
 from django import template
 from django.template.defaultfilters import stringfilter
-from django.utils.encoding import force_unicode
+from django.utils.encoding import force_text
 from django.utils.safestring import mark_safe
 from django.utils.html import urlize
 from django.utils.http import urlquote_plus as django_urlquote_plus
@@ -24,7 +24,7 @@ def querydict_set(querydict, param_name, param_value):
     querydict = querydict.copy()
 
     # Set or delete the value.
-    if force_unicode(param_value):
+    if force_text(param_value):
         querydict[param_name] = param_value
     else:
         querydict.pop(param_name, None)
@@ -62,7 +62,7 @@ def intspace(value):
     Converts an integer to a string containing spaces every three digits.
     For example, 3000 becomes '3 000' and 45000 becomes '45 000'.
     """
-    orig = force_unicode(value)
+    orig = force_text(value)
     new = INTSPACE_RE.sub('\g<1> \g<2>', orig)
     return new if orig == new else intspace(new)
 
@@ -73,7 +73,7 @@ def intspace_r(value):
     Like intspace, but orders groups of 1 or 2 digits to the end
     instead of the beginning.
     """
-    return intspace(force_unicode(value)[::-1])[::-1]
+    return intspace(force_text(value)[::-1])[::-1]
 
 
 @register.filter

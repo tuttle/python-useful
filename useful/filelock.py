@@ -97,7 +97,10 @@ class FileLock(object):
                 'pid': os.getpid(),
                 'argv': sys.argv,
             }
-            os.write(self.fd, self.json.dumps(info, indent=4))
+            os.write(
+                self.fd,
+                self.json.dumps(info, indent=4).encode('utf-8'),
+            )
             os.fsync(self.fd)
 
     def release(self):
@@ -118,7 +121,7 @@ class FileLock(object):
             except ValueError:
                 # We don't steal if the lockfile is empty of contains an invalid JSON value.
                 pass
-            except IOError, e:
+            except IOError as e:
                 # We ignore when the lockfile was removed between the exclusive open and load.
                 if e.errno != errno.ENOENT:
                     raise

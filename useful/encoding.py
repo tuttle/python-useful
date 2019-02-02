@@ -17,7 +17,7 @@ def strip_accents(unistr):
     """
     Return the accent-stripped str for the given unistr (unicode is required).
     """
-    return unicodedata.normalize('NFKD', unistr).encode('ascii', 'ignore')
+    return unicodedata.normalize('NFKD', unistr).encode('ascii', 'ignore').decode('ascii')
 
 
 def encoded_stream(stream, into='UTF-8'):

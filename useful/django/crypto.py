@@ -1,5 +1,5 @@
 from django.utils.crypto import salted_hmac, constant_time_compare
-from django.utils.encoding import smart_str
+from django.utils.encoding import smart_text
 
 
 class SecretTokenGenerator(object):
@@ -13,7 +13,7 @@ class SecretTokenGenerator(object):
     django.contrib.auth.tokens.PasswordResetTokenGenerator
     """
     def make_token(self, protectable):
-        p = smart_str(protectable)
+        p = smart_text(protectable)
         return salted_hmac(self.__class__.__name__, p).hexdigest()[::-2]
 
     def check_token(self, protectable, token):
