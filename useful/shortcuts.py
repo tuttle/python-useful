@@ -1,4 +1,9 @@
-from itertools import ifilter
+try:
+    # Python 2
+    from future_builtins import filter
+except ImportError:
+    # Python 3
+    pass
 
 
 def first(predicate_or_None, iterable, default=None):
@@ -7,7 +12,7 @@ def first(predicate_or_None, iterable, default=None):
     If predicate is None, matches the first item that is true.
     Returns value of default in case of no matching items.
     """
-    return next(ifilter(predicate_or_None, iterable), default)
+    return next(filter(predicate_or_None, iterable), default)
 
 
 def int_or_0(value):
