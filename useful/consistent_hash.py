@@ -26,7 +26,11 @@ class ConsistentHashRing(object):
             list(map(self.add_bucket, buckets))
 
     def hash(self, key):
-        return int(hashlib.md5(key).hexdigest(), 16)
+        if not isinstance(key, bytes):  # unicode strings py2/3
+            key_bytestring = key.encode('utf-8')
+        else:
+            key_bytestring = key
+        return int(hashlib.md5(key_bytestring).hexdigest(), 16)
 
     def ireplicas(self, bucket):
         for r in range(self.replicas):
