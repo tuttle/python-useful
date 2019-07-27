@@ -5,7 +5,10 @@ import hashlib
 import sys
 
 
-if sys.version_info.major < 3:
+PY2 = sys.version_info[0] == 2
+
+
+if PY2:
     range = xrange
 
 
