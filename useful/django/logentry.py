@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 from django.contrib import admin
 from django.contrib.admin.models import ADDITION, CHANGE, DELETION, LogEntry
 from django.contrib.contenttypes.models import ContentType
@@ -64,8 +66,8 @@ class UILogEntry(object):
             lst = get_text_list(form.changed_data, _('and'))
             change_message.append(_('Changed %s.') % lst)
 
-        change_message = u' '.join(change_message)
-        return unicode(change_message or _('No fields changed.'))
+        change_message = ' '.join(change_message)
+        return force_text(change_message or _('No fields changed.'))
 
     def do_log(self, object_, action_flag, message):
         LogEntry.objects.log_action(
@@ -74,7 +76,7 @@ class UILogEntry(object):
             object_id=object_.pk,
             object_repr=force_text(object_),
             action_flag=action_flag,
-            change_message=unicode(message),
+            change_message=force_text(message),
         )
 
     def save_form_instance_and_log(self, form):
