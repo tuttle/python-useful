@@ -1,3 +1,4 @@
+from __future__ import division
 from __future__ import print_function
 
 import bisect
@@ -100,7 +101,12 @@ if __name__ == '__main__':
         print('%10d %10s %10s     ' % (key, bucket1, bucket2), ['', 'CHANGES!'][eq])
 
     print()
-    print(cnt, '\t%.1f%% of keys change its bucket' % (100.*cnt[1]/sum(cnt)))
+    print(
+        cnt,
+        '\t%.1f%% of keys change its bucket' % (
+            100 * cnt[1] / sum(cnt),
+        )
+    )
 
     print()
     for k in set(u1) | set(u2):
@@ -110,8 +116,8 @@ if __name__ == '__main__':
             '%10s %10d   %-70s    %10d   %-70s' % (
                 k,
                 v1,
-                '*' * (v1/5),
+                '*' * (v1 // 5),
                 v2,
-                '*' * (v2/5),
+                '*' * (v2 // 5),
             )
         )
