@@ -15,7 +15,11 @@ class AttrDict(dict):
 
         self[name] = value
 
-    __getattr__ = dict.__getitem__
+    def __getattr__(self, name):
+        try:
+            return super().__getitem__(name)
+        except KeyError:
+            raise AttributeError("'AttrDict' object has no attribute '%s'" % name)
 
     def __getstate__(self):
         return self.__dict__.copy()

@@ -1,6 +1,7 @@
 from collections import defaultdict
 import itertools
 import operator
+from functools import reduce
 
 
 def count_by_attr(iterable, by):
@@ -104,4 +105,4 @@ def iter_ibatches(iterable, size):
     it = iter(iterable)
     while True:
         batch_it = itertools.islice(it, size)
-        yield itertools.chain([batch_it.next()], batch_it)
+        yield itertools.chain([next(batch_it)], batch_it)

@@ -1,11 +1,18 @@
 from functools import wraps
 import hashlib
+import sys
 
 from django.core import cache  # Importing this way so debug_toolbar can patch it later.
 from django.core.cache.backends.base import DEFAULT_TIMEOUT
 
 
-ALLOWED_CACHED_FUNCTION_ARG_TYPES = set((type(None), int, float, long, bool, str, unicode))
+PY2 = sys.version_info[0] == 2
+
+
+if PY2:
+    ALLOWED_CACHED_FUNCTION_ARG_TYPES = set((type(None), int, float, long, bool, str, unicode))
+else:
+    ALLOWED_CACHED_FUNCTION_ARG_TYPES = set((type(None), int, float, bool, str, bytes))
 
 
 def cached_function(func=None, num_args_to_key=None, timeout=DEFAULT_TIMEOUT):
@@ -41,7 +48,7 @@ def cached_function(func=None, num_args_to_key=None, timeout=DEFAULT_TIMEOUT):
 
     """
     def cached_function_inner(func):
-        if func.func_defaults:
+        if func.__defaults__:
             raise RuntimeError("cached_function does not allow function to have default args "
                                "in order to keep the number of passed args fixed.")
 
@@ -62,7 +69,11 @@ def cached_function(func=None, num_args_to_key=None, timeout=DEFAULT_TIMEOUT):
             key = key_fmt % ','.join(map(repr, key_args))
 
             if len(key) > 200:
-                key_args = hashlib.sha256(key_args).hexdigest()
+                if not isinstance(key_args, bytes):  # unicode strings py2/3
+                    key_args_bytestring = key_args.encode('utf-8')
+                else:
+                    key_args_bytestring = key_args
+                key_args = hashlib.sha256(key_args_bytestring).hexdigest()
                 key = key_fmt % key_args + '-hashed'
 
             value = cache.cache.get(key)

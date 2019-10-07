@@ -1,5 +1,16 @@
+from __future__ import division
+from __future__ import print_function
+
 import bisect
 import hashlib
+import sys
+
+
+PY2 = sys.version_info[0] == 2
+
+
+if PY2:
+    range = xrange
 
 
 class ConsistentHashRing(object):
@@ -16,13 +27,17 @@ class ConsistentHashRing(object):
         self.bucket_map = {}
 
         if buckets:
-            map(self.add_bucket, buckets)
+            list(map(self.add_bucket, buckets))
 
     def hash(self, key):
-        return long(hashlib.md5(key).hexdigest(), 16)
+        if not isinstance(key, bytes):  # unicode strings py2/3
+            key_bytestring = key.encode('utf-8')
+        else:
+            key_bytestring = key
+        return int(hashlib.md5(key_bytestring).hexdigest(), 16)
 
     def ireplicas(self, bucket):
-        for r in xrange(self.replicas):
+        for r in range(self.replicas):
             yield self.hash(
                 '%s:%d' % (bucket, r)
             )
@@ -73,7 +88,7 @@ if __name__ == '__main__':
 
     cnt = [0, 0]
 
-    for key in xrange(4000):
+    for key in range(4000):
         bucket1 = ring1.select_bucket(key)
         u1[bucket1] += 1
 
@@ -83,19 +98,26 @@ if __name__ == '__main__':
         eq = bucket1 != bucket2
         cnt[eq] += 1
 
-        print '%10d %10s %10s     ' % (key, bucket1, bucket2), ['', 'CHANGES!'][eq]
+        print('%10d %10s %10s     ' % (key, bucket1, bucket2), ['', 'CHANGES!'][eq])
 
-    print
-    print cnt, '\t%.1f%% of keys change its bucket' % (100.*cnt[1]/sum(cnt))
+    print()
+    print(
+        cnt,
+        '\t%.1f%% of keys change its bucket' % (
+            100 * cnt[1] / sum(cnt),
+        )
+    )
 
-    print
+    print()
     for k in set(u1) | set(u2):
         v1 = u1.get(k, 0)
         v2 = u2.get(k, 0)
-        print '%10s %10d   %-70s    %10d   %-70s' % (
-            k,
-            v1,
-            '*' * (v1/5),
-            v2,
-            '*' * (v2/5),
+        print(
+            '%10s %10d   %-70s    %10d   %-70s' % (
+                k,
+                v1,
+                '*' * (v1 // 5),
+                v2,
+                '*' * (v2 // 5),
+            )
         )
