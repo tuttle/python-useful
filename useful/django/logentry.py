@@ -113,10 +113,25 @@ class LogEntryAdmin(ReadOnlyModelAdmin):
 
         admin.site.register(LogEntry, LogEntryAdmin)
     """
-    list_display = 'action_time_nolink', 'user', 'table', 'action', 'change_message'
+    list_display = (
+        'action_time_nolink',
+        'user',
+        'table',
+        'action',
+        'get_change_message' if hasattr(LogEntry, 'get_change_message') else 'change_message',
+    )
     list_filter = (
         'user__is_superuser',
         ('content_type', admin.RelatedOnlyFieldListFilter),
+    )
+    list_select_related = (
+        'user',
+        'content_type',
+    )
+    search_fields = (
+        'user__email',
+        'object_repr',
+        'change_message',
     )
     date_hierarchy = 'action_time'
 
@@ -146,7 +161,3 @@ class LogEntryAdmin(ReadOnlyModelAdmin):
     action.allow_tags = True
     action.short_description = _("Action, object")
     action.admin_order_field = 'object_repr'
-
-    def queryset(self, request):
-        qs = super(LogEntryAdmin, self).queryset(request)
-        return qs.select_related('user', 'content_type')
