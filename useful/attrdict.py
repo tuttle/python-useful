@@ -17,9 +17,9 @@ class AttrDict(dict):
 
     def __getattr__(self, name):
         try:
-            return super().__getitem__(name)
+            return super(AttrDict, self).__getitem__(name)
         except KeyError:
-            raise AttributeError("'AttrDict' object has no attribute '%s'" % name)
+            raise AttributeError("'AttrDict' object has no attribute or key '%s'" % name)
 
     def __getstate__(self):
         return self.__dict__.copy()
@@ -59,10 +59,9 @@ else:
 
         def __getattr__(self, name):
             """
-            While AttrDict.__getattr__ is raising KeyError, this one needs to convert it to
-            AttributeError as OrderedDict establishes some names in constructor.
+            Converting to AttributeError as OrderedDict establishes some names in constructor.
             """
             try:
                 return self.__getitem__(name)
             except KeyError as e:
-                raise AttributeError(e)
+                raise AttributeError("'OrderedAttrDict' object has no attribute or key '%s'" % name)
