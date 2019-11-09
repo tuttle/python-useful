@@ -25,13 +25,13 @@ class FileLock(object):
         Usage example::
 
             with FileLock('/tmp/myproject-critical-processing'):
-                print "This section will only be executed by a single thread at the same time."
+                print("This section will only be executed by a single thread at the same time.")
 
         You can also use the instance as the decorator::
 
             @FileLock('/tmp/func1-critical-processing')
             def func1():
-                print "This function will only be executed by a single thread at the same time."
+                print("This function will only be executed by a single thread at the same time.")
 
         Also the lock stealing is implemented (stealing=True), but only on the POSIX system where it is possible to send
         signal 0 to process to test its existence. If requested, the locking process will write a small JSON info to the

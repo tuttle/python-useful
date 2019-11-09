@@ -49,7 +49,7 @@ def install_termination_logging_signal_handlers():
         logging.info("Terminating with signal %d%s." % (signum, signame))
         sys.exit(2)     # calls exit_function
 
-    for s in xrange(100):
+    for s in range(100):
         if s not in (signal.SIGCHLD, signal.SIGURG, signal.SIGWINCH):
             try:
                 signal.signal(s, sig_handler)

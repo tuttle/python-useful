@@ -92,8 +92,8 @@ def iter_ibatches(iterable, size):
     WARNING:
     Each batch must be entirely consumed before proceeding to the next one, otherwise you will get unexpected behaviour!
 
-    >>> for b in iter_ibatches(xrange(55), 10):
-    ...     print tuple(b)
+    >>> for b in iter_ibatches(range(55), 10):
+    ...     print(tuple(b))
     (0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
     (10, 11, 12, 13, 14, 15, 16, 17, 18, 19)
     (20, 21, 22, 23, 24, 25, 26, 27, 28, 29)
@@ -105,4 +105,7 @@ def iter_ibatches(iterable, size):
     it = iter(iterable)
     while True:
         batch_it = itertools.islice(it, size)
-        yield itertools.chain([next(batch_it)], batch_it)
+        try:
+            yield itertools.chain([next(batch_it)], batch_it)
+        except StopIteration:
+            return
