@@ -1,6 +1,6 @@
 from django.core import urlresolvers
 from django.core.exceptions import PermissionDenied
-from django.utils.functional import memoize
+from functools import lru_cache
 
 # This module requires that you use useful.django.urlpatterns.UrlPatterns
 # to decorate your views.
@@ -8,6 +8,7 @@ from django.utils.functional import memoize
 _all_callbacks = {}     # caches the callbacks dicts per URLconf
 
 
+@lru_cache()
 def get_all_callbacks(urlconf):
     """
     Gets the dict translating the view names to view callables for the entire
@@ -38,7 +39,6 @@ def get_all_callbacks(urlconf):
 
     add_callbacks(urlresolvers.get_resolver(urlconf), '')
     return callbacks
-get_all_callbacks = memoize(get_all_callbacks, _all_callbacks, 1)
 
 
 def can_url(user, view):
@@ -48,7 +48,7 @@ def can_url(user, view):
     namespace prefix ('namespace:view_name'). The view function must be
     decorated with the can_url_func (that's what UrlPatterns class does).
     """
-    view = urlresolvers.get_callable(view, True)
+    view = urlresolvers.get_callable(view)
 
     if not callable(view):
         callbacks = get_all_callbacks(urlresolvers.get_urlconf())

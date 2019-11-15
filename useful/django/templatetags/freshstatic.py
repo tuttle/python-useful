@@ -1,7 +1,7 @@
 import os
 import stat
 import posixpath
-import urllib
+from urllib.parse import unquote
 
 from django import template
 from django.conf import settings
@@ -39,7 +39,7 @@ def freshstatic(path):
         url = storage.staticfiles_storage.url(path)
 
         # Get the real file abs path and its timestamp.
-        normalized_path = posixpath.normpath(urllib.unquote(path)).lstrip('/')
+        normalized_path = posixpath.normpath(unquote(path)).lstrip('/')
         absolute_path = finders.find(normalized_path)
 
         if absolute_path:
