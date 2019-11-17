@@ -1,7 +1,7 @@
 import os
 import stat
 import posixpath
-from urllib.parse import unquote
+from sys import version_info
 
 from django import template
 from django.conf import settings
@@ -10,6 +10,11 @@ from django.contrib.staticfiles import finders, storage
 register = template.Library()
 
 STATIC_URL_CACHE = {}
+
+if version_info >= 3:
+    from urllib.parse import unquote
+else:
+    from urllib import unquote
 
 
 @register.simple_tag

@@ -1,14 +1,19 @@
+import django
 from django.core import urlresolvers
 from django.core.exceptions import PermissionDenied
-from functools import lru_cache
+from sys import version_info
+
+if version_info >= (3, 2):
+    # added to Python 3.2: https://docs.python.org/3.2/library/functools.html#functools.lru_cache
+    from functools import lru_cache
+else:
+    # removed in Django 1.9: docs.djangoproject.com/en/1.9/releases/1.9/#features-removed-in-1-9
+    from django.utils.functional import memoize
 
 # This module requires that you use useful.django.urlpatterns.UrlPatterns
 # to decorate your views.
 
-_all_callbacks = {}     # caches the callbacks dicts per URLconf
 
-
-@lru_cache()
 def get_all_callbacks(urlconf):
     """
     Gets the dict translating the view names to view callables for the entire
@@ -41,6 +46,13 @@ def get_all_callbacks(urlconf):
     return callbacks
 
 
+if version_info >= (3, 2):
+    get_all_callbacks = lru_cache(get_all_callbacks)
+else:
+    _all_callbacks = {}  # caches the callbacks dicts per URLconf
+    get_all_callbacks = memoize(get_all_callbacks, _all_callbacks, 1)
+
+
 def can_url(user, view):
     """
     Tests whether the given user would have access to the view. The view can
@@ -48,7 +60,10 @@ def can_url(user, view):
     namespace prefix ('namespace:view_name'). The view function must be
     decorated with the can_url_func (that's what UrlPatterns class does).
     """
-    view = urlresolvers.get_callable(view)
+    if django.VERSION >= (1, 10):
+        view = urlresolvers.get_callable(view)
+    else:
+        view = urlresolvers.get_callable(view, True)
 
     if not callable(view):
         callbacks = get_all_callbacks(urlresolvers.get_urlconf())
