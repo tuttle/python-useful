@@ -11,7 +11,7 @@ register = template.Library()
 
 STATIC_URL_CACHE = {}
 
-if version_info >= 3:
+if version_info[0] >= 3:
     from urllib.parse import unquote
 else:
     from urllib import unquote
