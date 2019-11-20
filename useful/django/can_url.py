@@ -1,19 +1,13 @@
 import django
 from django.core import urlresolvers
 from django.core.exceptions import PermissionDenied
-from sys import version_info
-
-if version_info >= (3, 2):
-    # added to Python 3.2: https://docs.python.org/3.2/library/functools.html#functools.lru_cache
-    from functools import lru_cache
-else:
-    # removed in Django 1.9: docs.djangoproject.com/en/1.9/releases/1.9/#features-removed-in-1-9
-    from django.utils.functional import memoize
+from django.utils import lru_cache
 
 # This module requires that you use useful.django.urlpatterns.UrlPatterns
 # to decorate your views.
 
 
+@lru_cache.lru_cache()
 def get_all_callbacks(urlconf):
     """
     Gets the dict translating the view names to view callables for the entire
@@ -44,13 +38,6 @@ def get_all_callbacks(urlconf):
 
     add_callbacks(urlresolvers.get_resolver(urlconf), '')
     return callbacks
-
-
-if version_info >= (3, 2):
-    get_all_callbacks = lru_cache(get_all_callbacks)
-else:
-    _all_callbacks = {}  # caches the callbacks dicts per URLconf
-    get_all_callbacks = memoize(get_all_callbacks, _all_callbacks, 1)
 
 
 def can_url(user, view):
