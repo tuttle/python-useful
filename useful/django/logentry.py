@@ -139,7 +139,6 @@ class LogEntryAdmin(ReadOnlyModelAdmin):
         return mark_safe(
             '</a><span style="font-weight: normal">%s</span><a>' % obj.action_time.strftime('%Y-%m-%d %H:%M:%S')
         )
-    action_time_nolink.allow_tags = True
     action_time_nolink.short_description = _("Action time")
     action_time_nolink.admin_order_field = 'action_time'
 
@@ -158,6 +157,5 @@ class LogEntryAdmin(ReadOnlyModelAdmin):
         return mark_safe(
             '<span class="%s">%s</span>' % (CHTYPES[obj.action_flag], r)
         )
-    action.allow_tags = True
     action.short_description = _("Action, object")
     action.admin_order_field = 'object_repr'
