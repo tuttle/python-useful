@@ -1,6 +1,16 @@
-from django.core import urlresolvers
+
 from django.core.exceptions import PermissionDenied
 from django.utils.functional import memoize
+from django.urls import NoReverseMatch
+from django.urls import get_callable
+from django.urls import get_resolver
+from django.urls.base import get_urlconf
+
+try:
+    # Django >=2.0
+    from django.urls import URLResolver as RegexURLResolver
+except ImportError:
+    from django.core.urlresolvers import RegexURLResolver
 
 # This module requires that you use useful.django.urlpatterns.UrlPatterns
 # to decorate your views.
@@ -18,7 +28,7 @@ def get_all_callbacks(urlconf):
 
     def add_callbacks(resolver, namespace):
         for pattern in resolver.url_patterns:
-            if isinstance(pattern, urlresolvers.RegexURLResolver):
+            if isinstance(pattern, RegexURLResolver):
                 ns = namespace
                 if pattern.namespace:
                     ns += (':' if ns else '') + pattern.namespace
@@ -36,8 +46,9 @@ def get_all_callbacks(urlconf):
                                            "last decorator only, it will apply to all." % ns_name)
                 callbacks[ns_name] = pattern.callback
 
-    add_callbacks(urlresolvers.get_resolver(urlconf), '')
+    add_callbacks(get_resolver(urlconf), '')
     return callbacks
+
 get_all_callbacks = memoize(get_all_callbacks, _all_callbacks, 1)
 
 
@@ -48,17 +59,17 @@ def can_url(user, view):
     namespace prefix ('namespace:view_name'). The view function must be
     decorated with the can_url_func (that's what UrlPatterns class does).
     """
-    view = urlresolvers.get_callable(view, True)
+    view = get_callable(view, True)
 
     if not callable(view):
-        callbacks = get_all_callbacks(urlresolvers.get_urlconf())
+        callbacks = get_all_callbacks(get_urlconf())
         if view not in callbacks:
-            raise urlresolvers.NoReverseMatch("Reverse for '%s' not found." % view)
+            raise NoReverseMatch("Reverse for '%s' not found." % view)
 
         view = callbacks[view]
 
     if not hasattr(view, 'can_url_func'):
-        raise urlresolvers.NoReverseMatch("Reverse for '%s' is not decorated with permissions." % view)
+        raise NoReverseMatch("Reverse for '%s' is not decorated with permissions." % view)
 
     try:
         return view.can_url_func(user)
