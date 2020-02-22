@@ -59,7 +59,7 @@ class EmailLoginModelBackend(ModelBackend):
 
         return user
 
-    def authenticate(self, username=None, password=None):
+    def authenticate(self, request, username=None, password=None):
         user = self.get_user_by_email(username)
         return user if user and user.check_password(password) else None
 
@@ -74,7 +74,7 @@ class UsernameOrEmailLoginModelBackend(EmailLoginModelBackend):
     """
     USERNAME_CASE_SENSITIVE = False
 
-    def authenticate(self, username=None, password=None):
+    def authenticate(self, request, username=None, password=None):
         if self.USERNAME_CASE_SENSITIVE:
             user = get_object_or_none(UserModel, username__exact=username)
         else:
