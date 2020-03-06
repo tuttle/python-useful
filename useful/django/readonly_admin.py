@@ -1,7 +1,15 @@
+
+from django import VERSION
 from django.contrib import admin
 from django.core.exceptions import PermissionDenied
-from django.utils.translation import ugettext_lazy as _
 from django.utils.safestring import mark_safe
+
+# Get rid off warnings in Django 3
+if VERSION[0] >= 2:
+    from django.utils.translation import gettext_lazy as _
+else:
+    # @RemoveFromDjangoVersion2
+    from django.utils.translation import ugettext_lazy as _
 
 
 class SemiReadOnlyModelAdmin(admin.ModelAdmin):

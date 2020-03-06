@@ -8,16 +8,17 @@ from django.contrib.contenttypes.models import ContentType
 from django.template.defaultfilters import capfirst
 from django.utils.safestring import mark_safe
 from django.utils.text import get_text_list
-from django.utils.translation import ugettext_lazy as _
 
 from .readonly_admin import ReadOnlyModelAdmin
 
 # Get rid off warnings in Django 3
 if VERSION[0] >= 2:
     from django.utils.encoding import force_str as force_text
+    from django.utils.translation import gettext_lazy as _
 else:
     # @RemoveFromDjangoVersion2
     from django.utils.encoding import force_text
+    from django.utils.translation import ugettext_lazy as _
 
 
 UserModel = get_user_model()
