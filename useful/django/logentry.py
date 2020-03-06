@@ -1,23 +1,26 @@
 from __future__ import unicode_literals
 
+from django import VERSION
 from django.contrib import admin
+from django.contrib.auth import get_user_model
 from django.contrib.admin.models import ADDITION, CHANGE, DELETION, LogEntry
 from django.contrib.contenttypes.models import ContentType
 from django.template.defaultfilters import capfirst
-from django.utils.encoding import force_text
 from django.utils.safestring import mark_safe
 from django.utils.text import get_text_list
 from django.utils.translation import ugettext_lazy as _
 
-# Django 1.5 swappable model support, backward compatible.
-try:
-    from django.contrib.auth import get_user_model
-except ImportError:
-    from django.contrib.auth.models import User as UserModel
-else:
-    UserModel = get_user_model()
-
 from .readonly_admin import ReadOnlyModelAdmin
+
+# Get rid off warnings in Django 3
+if VERSION[0] >= 2:
+    from django.utils.encoding import force_str as force_text
+else:
+    # @RemoveFromDjangoVersion2
+    from django.utils.encoding import force_text
+
+
+UserModel = get_user_model()
 
 
 class UILogEntry(object):
