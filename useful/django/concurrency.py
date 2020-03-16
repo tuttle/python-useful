@@ -3,15 +3,18 @@ import hashlib
 from django import VERSION
 from django import forms
 from django.utils.safestring import mark_safe
-from django.utils.encoding import smart_text, force_text
 from django.utils.crypto import salted_hmac, constant_time_compare
 from django.contrib.auth.forms import UserChangeForm
 
 # Get rid off warnings in Django 3
 if VERSION[0] >= 2:
+    from django.utils.encoding import force_str as force_text
+    from django.utils.encoding import smart_str as smart_text
     from django.utils.translation import gettext_lazy as _
 else:
     # @RemoveFromDjangoVersion2
+    from django.utils.encoding import force_text
+    from django.utils.encoding import smart_text
     from django.utils.translation import ugettext_lazy as _
 
 
