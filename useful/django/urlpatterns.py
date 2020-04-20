@@ -1,5 +1,6 @@
-import re
+
 from functools import wraps
+import re
 try:
     from urllib.parse import urlparse
 except ImportError:     # Python 2
@@ -12,6 +13,10 @@ from django.core.exceptions import PermissionDenied
 from django.shortcuts import resolve_url
 from django.utils.decorators import available_attrs
 from django.utils.encoding import force_str
+from sys import version_info
+
+
+PY2 = version_info[0] == 2
 
 
 class UrlPatterns(list):
@@ -175,7 +180,10 @@ class UrlPatterns(list):
                 _wrapped.can_url_perms_compiled = compiled_anded_perms
 
             # Assigning different name to avoid changing the nonlocal variable.
-            url_name = view_func.func_name if name is () else name
+            if PY2:
+                url_name = view_func.func_name if name is () else name
+            else:
+                url_name = view_func.__name__ if name is () else name
             self.append(url(regex, _wrapped, kwargs=kwargs, name=url_name))
 
             return _wrapped

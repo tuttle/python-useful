@@ -1,23 +1,24 @@
 
 from django.core.exceptions import PermissionDenied
-from django.utils.functional import memoize
 from django.urls import NoReverseMatch
 from django.urls import get_callable
 from django.urls import get_resolver
 from django.urls.base import get_urlconf
 
 try:
-    # Django >=2.0
+    # Django >=2.0 & Py >= 3
+    from functools import lru_cache
     from django.urls import URLResolver as RegexURLResolver
 except ImportError:
     from django.core.urlresolvers import RegexURLResolver
+    from django.utils import lru_cache
+
 
 # This module requires that you use useful.django.urlpatterns.UrlPatterns
 # to decorate your views.
 
-_all_callbacks = {}     # caches the callbacks dicts per URLconf
 
-
+@lru_cache.lru_cache()
 def get_all_callbacks(urlconf):
     """
     Gets the dict translating the view names to view callables for the entire
@@ -49,8 +50,6 @@ def get_all_callbacks(urlconf):
     add_callbacks(get_resolver(urlconf), '')
     return callbacks
 
-get_all_callbacks = memoize(get_all_callbacks, _all_callbacks, 1)
-
 
 def can_url(user, view):
     """
@@ -59,7 +58,7 @@ def can_url(user, view):
     namespace prefix ('namespace:view_name'). The view function must be
     decorated with the can_url_func (that's what UrlPatterns class does).
     """
-    view = get_callable(view, True)
+    view = get_callable(view)
 
     if not callable(view):
         callbacks = get_all_callbacks(get_urlconf())
