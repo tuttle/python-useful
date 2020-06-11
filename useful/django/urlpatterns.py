@@ -95,10 +95,17 @@ class UrlPatterns(list):
 
         ### settings.py
 
-        TEMPLATE_CONTEXT_PROCESSORS += (
+        TEMPLATES = {
+            'BACKEND': 'django.template.backends.django.DjangoTemplates',
             ...
-            'useful.django.can_url.can_url_processor',
-        )
+            'OPTIONS': {
+                'context_processors': [
+                    ...
+                    'useful.django.can_url.can_url_processor',
+                ],
+                ...
+            }
+        }
 
         ### in some template.html
 

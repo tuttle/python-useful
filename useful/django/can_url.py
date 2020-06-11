@@ -10,15 +10,15 @@ try:
     from functools import lru_cache
     from django.urls import URLResolver as RegexURLResolver
 except ImportError:
-    from django.core.urlresolvers import RegexURLResolver
-    from django.utils import lru_cache
+    from django.urls import RegexURLResolver
+    from django.utils.lru_cache import lru_cache
 
 
 # This module requires that you use useful.django.urlpatterns.UrlPatterns
 # to decorate your views.
 
 
-@lru_cache.lru_cache()
+@lru_cache()
 def get_all_callbacks(urlconf):
     """
     Gets the dict translating the view names to view callables for the entire
@@ -58,7 +58,8 @@ def can_url(user, view):
     namespace prefix ('namespace:view_name'). The view function must be
     decorated with the can_url_func (that's what UrlPatterns class does).
     """
-    view = get_callable(view)
+    if ':' not in view:
+        view = get_callable(view)
 
     if not callable(view):
         callbacks = get_all_callbacks(get_urlconf())
