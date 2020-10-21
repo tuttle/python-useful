@@ -1,6 +1,15 @@
+
+from django import VERSION
 from django.contrib import admin
 from django.core.exceptions import PermissionDenied
-from django.utils.translation import ugettext_lazy as _
+from django.utils.safestring import mark_safe
+
+# Get rid off warnings in Django 3
+if VERSION[0] >= 2:
+    from django.utils.translation import gettext_lazy as _
+else:
+    # @RemoveFromDjangoVersion2
+    from django.utils.translation import ugettext_lazy as _
 
 
 class SemiReadOnlyModelAdmin(admin.ModelAdmin):
@@ -27,18 +36,23 @@ class ReadOnlyModelAdmin(SemiReadOnlyModelAdmin):
         raise PermissionDenied
 
     def id_nolink(self, obj):
-        return '</a><span style="font-weight: normal">%s</span><a>' % obj.id
-    id_nolink.allow_tags = True
+        return mark_safe(
+            '</a><span style="font-weight: normal">%s</span><a>' % obj.id
+        )
     id_nolink.short_description = "ID"
 
     def created_nolink(self, obj):
-        return '</a><span style="font-weight: normal">%s</span><a>' \
-            % obj.created.strftime('%Y-%m-%d %H:%M:%S')
-    created_nolink.allow_tags = True
+        return mark_safe(
+            '</a><span style="font-weight: normal">%s</span><a>' % (
+                obj.created.strftime('%Y-%m-%d %H:%M:%S'),
+            )
+        )
     created_nolink.short_description = _("Created")
 
     def entered_nolink(self, obj):
-        return '</a><span style="font-weight: normal">%s</span><a>' \
-            % obj.entered.strftime('%Y-%m-%d %H:%M:%S')
-    entered_nolink.allow_tags = True
+        return mark_safe(
+            '</a><span style="font-weight: normal">%s</span><a>' % (
+                obj.entered.strftime('%Y-%m-%d %H:%M:%S'),
+            )
+        )
     entered_nolink.short_description = _("Entered")

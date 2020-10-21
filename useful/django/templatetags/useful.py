@@ -1,12 +1,19 @@
 import os
 import re
 
+from django import VERSION
 from django import template
 from django.template.defaultfilters import stringfilter
-from django.utils.encoding import force_text
 from django.utils.safestring import mark_safe
 from django.utils.html import urlize
 from django.utils.http import urlquote_plus as django_urlquote_plus
+
+# Get rid off warnings in Django 3
+if VERSION[0] >= 2:
+    from django.utils.encoding import force_str as force_text
+else:
+    # @RemoveFromDjangoVersion2
+    from django.utils.encoding import force_text
 
 register = template.Library()
 

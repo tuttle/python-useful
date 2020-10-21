@@ -1,5 +1,13 @@
+
+from django import VERSION
 from django.utils.crypto import salted_hmac, constant_time_compare
-from django.utils.encoding import smart_text
+
+# Get rid off warnings in Django 3
+if VERSION[0] >= 2:
+    from django.utils.encoding import smart_str as smart_text
+else:
+    # @RemoveFromDjangoVersion2
+    from django.utils.encoding import smart_text
 
 
 class SecretTokenGenerator(object):

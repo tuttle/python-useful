@@ -69,7 +69,7 @@ def prefetch_m2m(m2m_field):
           {{ groups_m2m|get:user.id|default_if_none:""|join:", " }}
     """
     f = m2m_field.field
-    tgt_objs = dict((o.pk, o) for o in f.rel.to.objects.all())
+    tgt_objs = dict((o.pk, o) for o in f.related_model.objects.all())
 
     cursor = connection.cursor()
     cursor.execute("SELECT %s, %s FROM %s" % (f.m2m_column_name(),

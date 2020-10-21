@@ -1,5 +1,7 @@
-import re
+
 from functools import wraps
+from functools import WRAPPER_ASSIGNMENTS
+import re
 try:
     from urllib.parse import urlparse
 except ImportError:     # Python 2
@@ -10,8 +12,23 @@ from django.conf.urls import url
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import resolve_url
-from django.utils.decorators import available_attrs
 from django.utils.encoding import force_str
+from sys import version_info
+
+
+PY2 = version_info[0] == 2
+
+
+def available_attrs(fn):
+    """
+    Return the list of functools-wrappable attributes on a callable.
+    This is required as a workaround for http://bugs.python.org/issue3445
+    under Python 2.
+    """
+    if PY2:
+        return tuple(a for a in WRAPPER_ASSIGNMENTS if hasattr(fn, a))
+    else:
+        return WRAPPER_ASSIGNMENTS
 
 
 class UrlPatterns(list):
@@ -78,10 +95,17 @@ class UrlPatterns(list):
 
         ### settings.py
 
-        TEMPLATE_CONTEXT_PROCESSORS += (
+        TEMPLATES = {
+            'BACKEND': 'django.template.backends.django.DjangoTemplates',
             ...
-            'useful.django.can_url.can_url_processor',
-        )
+            'OPTIONS': {
+                'context_processors': [
+                    ...
+                    'useful.django.can_url.can_url_processor',
+                ],
+                ...
+            }
+        }
 
         ### in some template.html
 
@@ -175,7 +199,10 @@ class UrlPatterns(list):
                 _wrapped.can_url_perms_compiled = compiled_anded_perms
 
             # Assigning different name to avoid changing the nonlocal variable.
-            url_name = view_func.func_name if name is () else name
+            if PY2:
+                url_name = view_func.func_name if name is () else name
+            else:
+                url_name = view_func.__name__ if name is () else name
             self.append(url(regex, _wrapped, kwargs=kwargs, name=url_name))
 
             return _wrapped

@@ -66,13 +66,14 @@ def cached_function(func=None, num_args_to_key=None, timeout=DEFAULT_TIMEOUT):
                                    % ', '.join(map(str, unallowed_types)))
 
             key_fmt = 'cached_function:%s.%s(%%s)' % (func.__module__, func.__name__)
-            key = key_fmt % ','.join(map(repr, key_args))
+            key_args_repr = ','.join(map(repr, key_args))
+            key = key_fmt % key_args_repr
 
             if len(key) > 200:
-                if not isinstance(key_args, bytes):  # unicode strings py2/3
-                    key_args_bytestring = key_args.encode('utf-8')
+                if not isinstance(key_args_repr, bytes):  # unicode strings py2/3
+                    key_args_bytestring = key_args_repr.encode('utf-8')
                 else:
-                    key_args_bytestring = key_args
+                    key_args_bytestring = key_args_repr
                 key_args = hashlib.sha256(key_args_bytestring).hexdigest()
                 key = key_fmt % key_args + '-hashed'
 
