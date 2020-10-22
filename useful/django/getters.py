@@ -8,15 +8,15 @@ from django.db.models.query import QuerySet
 def _get_queryset(klass):
     """
     Returns a QuerySet from a Model, Manager, or QuerySet.
-
-    NoDRY: Function copied from __init__ in django.shortcuts to assure stability.
     """
     if isinstance(klass, QuerySet):
         return klass
     elif isinstance(klass, Manager):
         manager = klass
     else:
+        # noinspection PyProtectedMember
         manager = klass._default_manager
+
     return manager.all()
 
 
@@ -69,12 +69,19 @@ def prefetch_m2m(m2m_field):
           {{ groups_m2m|get:user.id|default_if_none:""|join:", " }}
     """
     f = m2m_field.field
-    tgt_objs = dict((o.pk, o) for o in f.related_model.objects.all())
+    tgt_objs = dict(
+        (o.pk, o) for o in f.related_model.objects.iterator()
+    )
 
     cursor = connection.cursor()
-    cursor.execute("SELECT %s, %s FROM %s" % (f.m2m_column_name(),
-                                              f.m2m_reverse_name(),
-                                              f.m2m_db_table()))
+    cursor.execute(
+        "SELECT %s, %s FROM %s" % (
+            f.m2m_column_name(),
+            f.m2m_reverse_name(),
+            f.m2m_db_table()
+        )
+    )
+
     lookup = defaultdict(list)
     for src, tgt in cursor.fetchall():
         lookup[src].append(tgt_objs[tgt])
@@ -86,7 +93,7 @@ def get_values_map(klass, by, *fields):
     """
     Creates the Python set or dict from data in klass.
     klass may be a Model, Manager, or QuerySet object.
-    If no fields are given, the result is the set of all distinct values of 'by'.
+    If no fields are given, the result is a set of all distinct values of 'by'.
     If fields is a single field, the result is dict by->field.
     Otherwise the key of dict is still 'by', the value is tuple of fields.
     """

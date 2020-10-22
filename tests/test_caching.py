@@ -1,19 +1,14 @@
-
-import sys
-
 from django.test import TestCase
 from django.utils.crypto import get_random_string
 
 from tests.testapp.utils import expensive_function
-
-PY2 = sys.version_info[0] == 2
 
 
 # @override_settings(AUTHENTICATION_BACKENDS=['useful.django.auth.EmailLoginModelBackend', ])
 class CachedFunctionTest(TestCase):
 
     def test_returns_result(self):
-        # counts provuded arguments
+        # counts provided arguments
         result = expensive_function(
             1, 'foo', None, 3.123, True,
         )

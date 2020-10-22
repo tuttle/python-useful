@@ -10,9 +10,10 @@ PY2 = sys.version_info[0] == 2
 
 
 if PY2:
-    ALLOWED_CACHED_FUNCTION_ARG_TYPES = set((type(None), int, float, long, bool, str, unicode))
+    # noinspection PyUnresolvedReferences
+    ALLOWED_CACHED_FUNCTION_ARG_TYPES = {type(None), int, float, long, bool, str, unicode}
 else:
-    ALLOWED_CACHED_FUNCTION_ARG_TYPES = set((type(None), int, float, bool, str, bytes))
+    ALLOWED_CACHED_FUNCTION_ARG_TYPES = {type(None), int, float, bool, str, bytes}
 
 
 def cached_function(func=None, num_args_to_key=None, timeout=DEFAULT_TIMEOUT):
@@ -89,11 +90,11 @@ def cached_function(func=None, num_args_to_key=None, timeout=DEFAULT_TIMEOUT):
         return wrapper
 
     if func is None:
-        # @cached_function(...)
+        # When used as @cached_function(...)
         return cached_function_inner
 
     elif callable(func):
-        # @cached_function
+        # When used as @cached_function
         return cached_function_inner(func)
 
     else:

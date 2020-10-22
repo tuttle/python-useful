@@ -63,5 +63,5 @@ else:
             """
             try:
                 return self.__getitem__(name)
-            except KeyError as e:
+            except KeyError:
                 raise AttributeError("'OrderedAttrDict' object has no attribute or key '%s'" % name)

@@ -1,4 +1,3 @@
-
 from django.conf.global_settings import *
 
 
@@ -15,6 +14,7 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.sites",
+    "useful.django",
     "tests.testapp.apps.TestAppConfig"
 ]
 

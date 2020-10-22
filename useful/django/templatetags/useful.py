@@ -1,12 +1,11 @@
 import os
 import re
 
-from django import VERSION
-from django import template
+from django import VERSION, template
 from django.template.defaultfilters import stringfilter
-from django.utils.safestring import mark_safe
 from django.utils.html import urlize
 from django.utils.http import urlquote_plus as django_urlquote_plus
+from django.utils.safestring import mark_safe
 
 # Get rid off warnings in Django 3
 if VERSION[0] >= 2:
@@ -70,17 +69,8 @@ def intspace(value):
     For example, 3000 becomes '3 000' and 45000 becomes '45 000'.
     """
     orig = force_text(value)
-    new = INTSPACE_RE.sub('\g<1> \g<2>', orig)
+    new = INTSPACE_RE.sub(r'\g<1> \g<2>', orig)
     return new if orig == new else intspace(new)
-
-
-@register.filter(is_safe=True)
-def intspace_r(value):
-    """
-    Like intspace, but orders groups of 1 or 2 digits to the end
-    instead of the beginning.
-    """
-    return intspace(force_text(value)[::-1])[::-1]
 
 
 @register.filter
@@ -104,6 +94,8 @@ def urlizetruncblank(value, limit, autoescape=None):
     u = urlize(value, trim_url_limit=int(limit), nofollow=True, autoescape=autoescape)
     u = u.replace('<a ', '<a target="_blank" ')
     return mark_safe(u)
+
+
 urlizetruncblank.is_safe = True
 urlizetruncblank.needs_autoescape = True
 

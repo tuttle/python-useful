@@ -1,6 +1,5 @@
-
 from django import VERSION
-from django.utils.crypto import salted_hmac, constant_time_compare
+from django.utils.crypto import constant_time_compare, salted_hmac
 
 # Get rid off warnings in Django 3
 if VERSION[0] >= 2:

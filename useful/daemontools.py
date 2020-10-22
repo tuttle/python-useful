@@ -1,12 +1,14 @@
-import os
-import sys
-import pwd
+import atexit
 import grp
 import logging.handlers
+import os
+import pwd
 import signal
-import atexit
+import sys
+from syslog import LOG_DAEMON
 
-# For becoming the daemon django.utils.daemonize.become_daemon() is used.
+
+# For becoming the daemon, django.utils.daemonize.become_daemon() is used.
 # The additional daemon-stuff utilities follow:
 
 
@@ -42,9 +44,13 @@ def install_termination_logging_signal_handlers():
     Install the handler for every reconfigurable signal (except some
     ignorables). On signal, the event is logged and process is terminated.
     """
-    def sig_handler(signum, unused_frame):
-        signames = [n for n, v in signal.__dict__.iteritems()
-                    if n.startswith('SIG') and v == signum]
+
+    # noinspection PyUnusedLocal
+    def sig_handler(signum, frame):
+        signames = [
+            n for n, v in signal.__dict__.items()
+            if n.startswith('SIG') and v == signum
+        ]
         signame = signames and ' (%s)' % signames[0] or ''
         logging.info("Terminating with signal %d%s." % (signum, signame))
         sys.exit(2)     # calls exit_function
@@ -57,7 +63,7 @@ def install_termination_logging_signal_handlers():
                 pass
 
 
-def init_syslog(level, process_ident, address='/dev/log', facility='daemon'):
+def init_syslog(level, process_ident, address='/dev/log', facility=LOG_DAEMON):
     """
     Set the root logger to be directed to syslog from the given level
     and with given ident string (which will get prepended to every message).
@@ -78,12 +84,12 @@ def setup_pidfile(pidfile_path):
 
     Note: The process needs to have file removing privileges in the end.
     """
-    def exit_function(pidfile_path):
+    def exit_function(pidfile_path_):
         try:
-            logging.debug("Removing PID file %s." % pidfile_path)
-            os.unlink(pidfile_path)
+            logging.debug("Removing PID file %s." % pidfile_path_)
+            os.unlink(pidfile_path_)
         except:
-            logging.error("Cannot remove PID file %s." % pidfile_path)
+            logging.error("Cannot remove PID file %s." % pidfile_path_)
 
     if os.path.exists(pidfile_path):
         logging.error("Pid file %s exists, aborting daemonization. "

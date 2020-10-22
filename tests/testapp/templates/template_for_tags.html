@@ -1,0 +1,16 @@
+{% load useful %}
+
+{% querydict_set querydict 'a' 'newvalue' %}
+{{ map1|get:'key1' }}
+{{ 'key1'|getfrom:map1 }}
+{{ int1|intspace }}
+{{ int2|intspace }}
+{{ int3|intspace }}
+{{ int4|intspace }}
+{{ int1m|intspace }}
+{{ int2m|intspace }}
+{{ int3m|intspace }}
+{{ int4m|intspace }}
+{{ string1|startswith:begin }}
+{{ string2|startswith:begin }}
+{{ path|strip_path }}

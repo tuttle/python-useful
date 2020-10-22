@@ -1,13 +1,11 @@
-
 import os
+import posixpath
 import stat
 import sys
-import posixpath
 
 from django import template
 from django.conf import settings
 from django.contrib.staticfiles import finders, storage
-
 
 PY2 = sys.version_info[0] == 2
 

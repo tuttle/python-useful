@@ -2,6 +2,7 @@ import hashlib
 
 from django import VERSION
 from django import forms
+from django.forms.utils import ErrorList
 from django.utils.safestring import mark_safe
 from django.utils.crypto import salted_hmac, constant_time_compare
 from django.contrib.auth.forms import UserChangeForm
@@ -59,7 +60,7 @@ def _clean_object_version(slf):
                 + ' ' + force_text(slf._CONCURRENCY_EDIT_MESSAGE)
 
     if slf.concurrency_problem:
-        errors = slf._errors.setdefault(forms.forms.NON_FIELD_ERRORS, forms.utils.ErrorList())
+        errors = slf._errors.setdefault(forms.forms.NON_FIELD_ERRORS, ErrorList())
         errors.append(mark_safe(slf.concurrency_problem))
 
 

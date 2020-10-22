@@ -1,4 +1,3 @@
-
 from django import VERSION
 from django.contrib import admin
 from django.core.exceptions import PermissionDenied
@@ -18,7 +17,7 @@ class SemiReadOnlyModelAdmin(admin.ModelAdmin):
     """
     actions = None
 
-    def has_add_permission(self, request, obj=None):  # @UnusedVariable
+    def has_add_permission(self, request, obj=None):
         return False
     has_delete_permission = has_add_permission
 #    has_change_permission = has_add_permission
@@ -29,10 +28,10 @@ class ReadOnlyModelAdmin(SemiReadOnlyModelAdmin):
     Not only hides the actions and adding/deleting controls, but really
     forbids the model change. Only change_list browsing is allowed.
 
-    Below are few examples of first items in the list_display the remove
+    Below are few examples of first items in the list_display that remove
     the detail link.
     """
-    def save_model(self, request, obj, form, change):  # @UnusedVariable - MUST NOT CHANGE THE VAR NAME
+    def save_model(self, request, obj, form, change):  # MUST NOT CHANGE THE VAR NAME
         raise PermissionDenied
 
     def id_nolink(self, obj):

@@ -1,5 +1,6 @@
 try:
     # Python 2
+    # noinspection PyCompatibility
     from future_builtins import filter
 except ImportError:
     # Python 3
@@ -12,7 +13,10 @@ def first(predicate_or_None, iterable, default=None):
     If predicate is None, matches the first item that is true.
     Returns value of default in case of no matching items.
     """
-    return next(filter(predicate_or_None, iterable), default)
+    return next(
+        filter(predicate_or_None, iterable),
+        default
+    )
 
 
 def int_or_0(value):

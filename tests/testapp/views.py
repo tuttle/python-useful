@@ -1,10 +1,8 @@
-
 from django.http import HttpResponse
 from django.shortcuts import render
 
 from useful.django.urlpatterns import UrlPatterns
 from useful.django.views import page
-
 
 app_name = 'testapp'
 urlpatterns = UrlPatterns()

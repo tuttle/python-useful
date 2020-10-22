@@ -1,16 +1,13 @@
-from __future__ import division
-from __future__ import print_function
+from __future__ import division, print_function
 
 import bisect
 import hashlib
 import sys
 
-
 PY2 = sys.version_info[0] == 2
 
-
-if PY2:
-    range = xrange
+# noinspection PyUnresolvedReferences,PyShadowingBuiltins
+range = xrange if PY2 else range
 
 
 class ConsistentHashRing(object):
@@ -29,11 +26,13 @@ class ConsistentHashRing(object):
         if buckets:
             list(map(self.add_bucket, buckets))
 
-    def hash(self, key):
+    @staticmethod
+    def hash(key):
         if not isinstance(key, bytes):  # unicode strings py2/3
             key_bytestring = key.encode('utf-8')
         else:
             key_bytestring = key
+
         return int(hashlib.md5(key_bytestring).hexdigest(), 16)
 
     def ireplicas(self, bucket):
@@ -77,7 +76,7 @@ class ConsistentHashRing(object):
         ]
 
 
-if __name__ == '__main__':
+def demo():
     from collections import defaultdict
 
     ring1 = ConsistentHashRing('abcdefghijklm')
@@ -121,3 +120,7 @@ if __name__ == '__main__':
                 '*' * (v2 // 5),
             )
         )
+
+
+if __name__ == '__main__':
+    demo()

@@ -106,6 +106,7 @@ class Choices:
         for k, v in self.defs.items():
             # Enforcing i18n by unicode/str()
             if PY2:
+                # noinspection PyUnresolvedReferences
                 yield v[0], k, unicode(v[1])
             else:
                 yield v[0], k, str(v[1])

@@ -26,10 +26,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 
 from django.conf import settings
-from django.contrib.auth import get_user, SESSION_KEY
+from django.contrib.auth import SESSION_KEY, get_user
 from django.core import cache  # Importing this way so debug_toolbar can patch it later.
 from django.db import models
-from django.db.models.signals import post_save, post_delete
+from django.db.models.signals import post_delete, post_save
 from django.utils.functional import SimpleLazyObject
 
 # Django 1.5 swappable model support, backward compatible.
@@ -54,7 +54,7 @@ except (ValueError, AttributeError):
     profile_model = None
 
 
-def invalidate_cache(sender, instance, **kwargs):  # @UnusedVariable
+def invalidate_cache(sender, instance, **kwargs):
     if isinstance(instance, UserModel):
         key = CACHE_KEY % instance.id
     else:

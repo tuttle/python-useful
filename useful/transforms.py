@@ -1,6 +1,6 @@
-from collections import defaultdict
 import itertools
 import operator
+from collections import defaultdict
 from functools import reduce
 
 
@@ -9,6 +9,7 @@ def count_by_attr(iterable, by):
     for obj in iterable:
         key = getattr(obj, by)
         d[key] += 1
+
     return d
 
 
@@ -34,6 +35,7 @@ def group_by_attr(iterable, by, get=None):
         if get is not None:
             obj = getattr(obj, get)
         d[key].append(obj)
+
     return d
 
 
