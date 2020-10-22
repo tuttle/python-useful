@@ -1,13 +1,12 @@
 from django.http import QueryDict
-from django.shortcuts import render
+from django.template.loader import render_to_string
 from django.test import TestCase
 
 
 class TemplateTagsTest(TestCase):
 
     def test_useful_tags(self):
-        body = render(
-            None,
+        body_lines = render_to_string(
             'template_for_tags.html',
             context=dict(
                 querydict=QueryDict('a=12&b=13'),
@@ -27,8 +26,7 @@ class TemplateTagsTest(TestCase):
                 begin='te',
                 path='/etc/passwd/shadow',
             )
-        )
-        body_lines = body.content.decode('UTF-8').strip().split('\n')
+        ).strip().split('\n')
 
         expected_lines = (
             ('a=newvalue&amp;b=13', 'b=13&amp;a=newvalue'),  # result should be one of these
