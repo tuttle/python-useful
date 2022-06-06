@@ -199,7 +199,7 @@ class LogEntryAdmin(ReadOnlyModelAdmin):
         admin.site.register(LogEntry, LogEntryAdmin)
     """
     list_display = (
-        'action_time_nolink',
+        'action_time',
         'user',
         'table',
         'action',
@@ -222,13 +222,6 @@ class LogEntryAdmin(ReadOnlyModelAdmin):
     date_hierarchy = 'action_time'
     list_per_page = 500
     list_max_show_all = 10000
-
-    def action_time_nolink(self, obj):
-        return mark_safe(
-            '</a><span style="font-weight: normal">%s</span><a>' % obj.action_time.strftime('%Y-%m-%d %H:%M:%S')
-        )
-    action_time_nolink.short_description = _("Action time")
-    action_time_nolink.admin_order_field = 'action_time'
 
     def table(self, obj):
         if obj.content_type_id:

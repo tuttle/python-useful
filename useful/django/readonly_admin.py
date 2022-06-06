@@ -1,57 +1,38 @@
-from django import VERSION
 from django.contrib import admin
 from django.core.exceptions import PermissionDenied
-from django.utils.safestring import mark_safe
-
-# Get rid off warnings in Django 3
-if VERSION[0] >= 2:
-    from django.utils.translation import gettext_lazy as _
-else:
-    # @RemoveFromDjangoVersion2
-    from django.utils.translation import ugettext_lazy as _
 
 
-class SemiReadOnlyModelAdmin(admin.ModelAdmin):
+class ReadOnlyModelAdmin(admin.ModelAdmin):
     """
-    Only hides the actions and adding/deleting controls.
+    ModelAdmin class that prevents modifications through the admin.
+    The changelist and the detail view work, but a 403 is returned
+    if one actually tries to edit an object.
+
+    Influenced by https://gist.github.com/aaugustin/1388243
     """
     actions = None
+
+    list_display_links = None
+
+    # We cannot call super().get_fields(request, obj) because that method calls
+    # get_readonly_fields(request, obj), causing infinite recursion. Ditto for
+    # super().get_form(request, obj). So we  assume the default ModelForm.
+    def get_readonly_fields(self, request, obj=None):
+        # noinspection PyProtectedMember
+        return self.fields or [f.name for f in self.model._meta.fields]
 
     def has_add_permission(self, request, obj=None):
         return False
     has_delete_permission = has_add_permission
-#    has_change_permission = has_add_permission
 
+    # Allow viewing objects but not actually changing them.
+    def has_change_permission(self, request, obj=None):
+        if request.method in ('GET', 'HEAD'):
+            return super(ReadOnlyModelAdmin, self).has_change_permission(request, obj)
+        return False
 
-class ReadOnlyModelAdmin(SemiReadOnlyModelAdmin):
-    """
-    Not only hides the actions and adding/deleting controls, but really
-    forbids the model change. Only change_list browsing is allowed.
-
-    Below are few examples of first items in the list_display that remove
-    the detail link.
-    """
     def save_model(self, request, obj, form, change):  # MUST NOT CHANGE THE VAR NAME
         raise PermissionDenied
 
-    def id_nolink(self, obj):
-        return mark_safe(
-            '</a><span style="font-weight: normal">%s</span><a>' % obj.id
-        )
-    id_nolink.short_description = "ID"
-
-    def created_nolink(self, obj):
-        return mark_safe(
-            '</a><span style="font-weight: normal">%s</span><a>' % (
-                obj.created.strftime('%Y-%m-%d %H:%M:%S'),
-            )
-        )
-    created_nolink.short_description = _("Created")
-
-    def entered_nolink(self, obj):
-        return mark_safe(
-            '</a><span style="font-weight: normal">%s</span><a>' % (
-                obj.entered.strftime('%Y-%m-%d %H:%M:%S'),
-            )
-        )
-    entered_nolink.short_description = _("Entered")
+    def save_related(self, request, form, formsets, change):
+        raise PermissionDenied
