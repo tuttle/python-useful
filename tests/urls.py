@@ -1,13 +1,13 @@
 
-from django.conf.urls import include
-from django.conf.urls import url
+from django.urls import include
+from django.urls import path
 
 from tests.testapp import views
 
 
 urlpatterns = [
-    url(r'testapp/', include('tests.testapp.views')),
-    url(
+    path(r'testapp/', include('tests.testapp.views')),
+    path(
         r'testapp/simple/',
         views.template_view,
         name='template_view'

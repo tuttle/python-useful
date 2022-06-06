@@ -1,5 +1,9 @@
 # Changelog
 
+## [dev]
+- Dropped support for Django <2.0
+- Dropped support for Python 2.7
+
 ## [0.8.7]
 - Static code check induced cleanup.
 - Removed verifiedhttp.py and intspace_r, not needed anymore.

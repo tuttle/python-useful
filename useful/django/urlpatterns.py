@@ -8,7 +8,7 @@ except ImportError:     # Python 2
     from urlparse import urlparse
 
 from django.conf import settings
-from django.conf.urls import url
+from django.urls import re_path
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import resolve_url
@@ -203,7 +203,7 @@ class UrlPatterns(list):
                 url_name = view_func.func_name if name is () else name
             else:
                 url_name = view_func.__name__ if name is () else name
-            self.append(url(regex, _wrapped, kwargs=kwargs, name=url_name))
+            self.append(re_path(regex, _wrapped, kwargs=kwargs, name=url_name))
 
             return _wrapped
 
