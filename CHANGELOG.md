@@ -3,6 +3,10 @@
 ## [dev]
 - Dropped support for Django <2.0
 - Dropped support for Python 2.7
+- Fixed CachedAuthenticationMiddleware to comply with Django system check framework
+
+## [0.8.8]
+- Simplified ReadOnlyModelAdmin
 
 ## [0.8.7]
 - Static code check induced cleanup.
