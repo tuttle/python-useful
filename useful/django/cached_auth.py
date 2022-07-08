@@ -27,23 +27,15 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 from django.conf import settings
 from django.contrib.auth import SESSION_KEY, get_user
+from django.contrib.auth.middleware import AuthenticationMiddleware
+from django.contrib.auth import get_user_model
 from django.core import cache  # Importing this way so debug_toolbar can patch it later.
 from django.db import models
 from django.db.models.signals import post_delete, post_save
 from django.utils.functional import SimpleLazyObject
 
-# Django 1.5 swappable model support, backward compatible.
-try:
-    from django.contrib.auth import get_user_model
-except ImportError:
-    from django.contrib.auth.models import User as UserModel
-else:
-    UserModel = get_user_model()
 
-try:
-    from django.utils.deprecation import MiddlewareMixin
-except ImportError:  # Django < 1.10
-    MiddlewareMixin = object
+UserModel = get_user_model()
 
 CACHE_KEY = 'cached_auth_middleware_1.5:%s'
 
@@ -91,7 +83,7 @@ def get_cached_user(request):
     return request._cached_user
 
 
-class CachedAuthenticationMiddleware(MiddlewareMixin):
+class CachedAuthenticationMiddleware(AuthenticationMiddleware):
     """
     A drop-in replacement for django.contrib.auth's built-in
     AuthenticationMiddleware. It tries to populate request.user by fetching
@@ -109,7 +101,7 @@ class CachedAuthenticationMiddleware(MiddlewareMixin):
             post_save.connect(invalidate_cache, sender=profile_model)
             post_delete.connect(invalidate_cache, sender=profile_model)
 
-        super(CachedAuthenticationMiddleware, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def process_request(self, request):
         assert hasattr(request, 'session'), \

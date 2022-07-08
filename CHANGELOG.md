@@ -1,5 +1,16 @@
 # Changelog
 
+## [dev]
+
+## [0.9.0]
+- Added support for Django 4.0
+- Dropped support for Django <3.2
+- Dropped support for Python 2.x
+- Fixed CachedAuthenticationMiddleware to comply with Django system check framework
+
+## [0.8.8]
+- Simplified ReadOnlyModelAdmin
+
 ## [0.8.7]
 - Static code check induced cleanup.
 - Removed verifiedhttp.py and intspace_r, not needed anymore.

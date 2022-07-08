@@ -1,12 +1,7 @@
+
 from django import VERSION
 from django.utils.crypto import constant_time_compare, salted_hmac
-
-# Get rid off warnings in Django 3
-if VERSION[0] >= 2:
-    from django.utils.encoding import smart_str as smart_text
-else:
-    # @RemoveFromDjangoVersion2
-    from django.utils.encoding import smart_text
+from django.utils.encoding import smart_str
 
 
 class SecretTokenGenerator(object):
@@ -20,7 +15,7 @@ class SecretTokenGenerator(object):
     django.contrib.auth.tokens.PasswordResetTokenGenerator
     """
     def make_token(self, protectable):
-        p = smart_text(protectable)
+        p = smart_str(protectable)
         return salted_hmac(self.__class__.__name__, p).hexdigest()[::-2]
 
     def check_token(self, protectable, token):

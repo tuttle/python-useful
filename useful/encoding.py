@@ -1,7 +1,12 @@
+
 import unicodedata
 
 
-GUESS_ENCODINGS_SEQUENCE = 'UTF-8', 'CP1250', 'ISO-8859-2'
+GUESS_ENCODINGS_SEQUENCE = (
+    'UTF-8',
+    'CP1250',
+    'ISO-8859-2',
+)
 
 
 def guess_decode(s, fallback_method='replace'):

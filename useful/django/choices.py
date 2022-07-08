@@ -1,10 +1,4 @@
 
-import sys
-
-
-PY2 = sys.version_info[0] == 2
-
-
 class Choices:
     """
     Encapsulates the choices definition and conversion. Praises the DRY.
@@ -104,12 +98,7 @@ class Choices:
         Generates tuples (db id, short name, text).
         """
         for k, v in self.defs.items():
-            # Enforcing i18n by unicode/str()
-            if PY2:
-                # noinspection PyUnresolvedReferences
-                yield v[0], k, unicode(v[1])
-            else:
-                yield v[0], k, str(v[1])
+            yield v[0], k, str(v[1])
 
     def select(self, keys):
         """

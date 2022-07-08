@@ -1,3 +1,7 @@
+
+from collections import OrderedDict
+
+
 class AttrDictSetCollision(Exception):
     """
     Raised when the AttrDict refuses to change any dict's attribute.
@@ -17,7 +21,7 @@ class AttrDict(dict):
 
     def __getattr__(self, name):
         try:
-            return super(AttrDict, self).__getitem__(name)
+            return super().__getitem__(name)
         except KeyError:
             raise AttributeError("'AttrDict' object has no attribute or key '%s'" % name)
 
@@ -31,37 +35,33 @@ class AttrDict(dict):
         return "%s(%s)" % (self.__class__.__name__, dict.__repr__(self))
 
 
-try:
-    from collections import OrderedDict
-except ImportError:
-    pass
-else:
-    class OrderedAttrDictSetCollision(Exception):
-        """
-        Raised when the OrderedAttrDict refuses to change any OrderedDict's attribute.
-        """
+class OrderedAttrDictSetCollision(Exception):
+    """
+    Raised when the OrderedAttrDict refuses to change any OrderedDict's attribute.
+    """
 
-    class OrderedAttrDict(OrderedDict):
+
+class OrderedAttrDict(OrderedDict):
+    """
+    Like AttrDict, but remembers ordering in which values were set.
+    """
+    def __setattr__(self, name, value):
         """
-        Like AttrDict, but remembers ordering in which values were set.
+        Needs a fork to allow OrderedDict to establish some private names in constructor.
         """
-        def __setattr__(self, name, value):
-            """
-            Needs a fork to allow OrderedDict to establish some private names in constructor.
-            """
-            if name.startswith('_OrderedDict__'):
-                return super(OrderedAttrDict, self).__setattr__(name, value)
+        if name.startswith('_OrderedDict__'):
+            return super().__setattr__(name, value)
 
-            if hasattr(OrderedDict, name):
-                raise OrderedAttrDictSetCollision(name)
+        if hasattr(OrderedDict, name):
+            raise OrderedAttrDictSetCollision(name)
 
-            self[name] = value
+        self[name] = value
 
-        def __getattr__(self, name):
-            """
-            Converting to AttributeError as OrderedDict establishes some names in constructor.
-            """
-            try:
-                return self.__getitem__(name)
-            except KeyError:
-                raise AttributeError("'OrderedAttrDict' object has no attribute or key '%s'" % name)
+    def __getattr__(self, name):
+        """
+        Converting to AttributeError as OrderedDict establishes some names in constructor.
+        """
+        try:
+            return self.__getitem__(name)
+        except KeyError:
+            raise AttributeError("'OrderedAttrDict' object has no attribute or key '%s'" % name)

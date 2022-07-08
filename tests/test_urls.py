@@ -1,6 +1,4 @@
 
-import sys
-
 from django.conf import settings
 from django.contrib.auth.models import Permission
 from django.contrib.auth.models import User
@@ -8,8 +6,6 @@ from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
 from django.test import override_settings
 from django.urls import reverse
-
-PY2 = sys.version_info[0] == 2
 
 TEMPLATES = [
     {
@@ -36,7 +32,7 @@ def test_resolves_view_defined_url():
 class CanUrlTest(TestCase):
 
     def setUp(self):
-        super(CanUrlTest, self).setUp()
+        super().setUp()
         content_type = ContentType.objects.get_for_model(User)
         self.permission = Permission.objects.create(
             codename='can_pass',
@@ -68,8 +64,7 @@ class CanUrlTest(TestCase):
             reverse('testapp:restricted_view'),
         )
         content = response.content
-        if not PY2:
-            content = content.decode('utf-8')
+        content = content.decode('utf-8')
 
         print("XXX")
         print(type(content))

@@ -1,17 +1,12 @@
 
+from functools import lru_cache
+
 from django.core.exceptions import PermissionDenied
 from django.urls import NoReverseMatch
 from django.urls import get_callable
 from django.urls import get_resolver
+from django.urls import URLResolver
 from django.urls.base import get_urlconf
-
-try:
-    # Django >=2.0 & Py >= 3
-    from functools import lru_cache
-    from django.urls import URLResolver as RegexURLResolver
-except ImportError:
-    from django.urls import RegexURLResolver
-    from django.utils.lru_cache import lru_cache
 
 
 # This module requires that you use useful.django.urlpatterns.UrlPatterns
@@ -29,7 +24,7 @@ def get_all_callbacks(urlconf):
 
     def add_callbacks(resolver, namespace):
         for pattern in resolver.url_patterns:
-            if isinstance(pattern, RegexURLResolver):
+            if isinstance(pattern, URLResolver):
                 ns = namespace
                 if pattern.namespace:
                     ns += (':' if ns else '') + pattern.namespace
