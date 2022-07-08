@@ -3,7 +3,7 @@ python-useful
 =============
 
 A collection of utilities of everyday use when writing
-Python 2.7 and Python 3.x code *or* Django projects.
+Python 3.x code *or* Django 3.2+ projects.
 
 Overview
 --------

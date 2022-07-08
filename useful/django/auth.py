@@ -1,16 +1,13 @@
-from .getters import get_object_or_none
 
 from django.contrib.auth.backends import ModelBackend
 from django.core.validators import validate_email, ValidationError
 from django.utils.crypto import get_random_string
+from django.contrib.auth import get_user_model
 
-# Django 1.5 swappable model support, backward compatible.
-try:
-    from django.contrib.auth import get_user_model
-except ImportError:
-    from django.contrib.auth.models import User as UserModel
-else:
-    UserModel = get_user_model()
+from useful.django.getters import get_object_or_none
+
+
+UserModel = get_user_model()
 
 
 def get_random_password(size=7, cadre='abcdehkmnprstuvxyz2345678923456789'):

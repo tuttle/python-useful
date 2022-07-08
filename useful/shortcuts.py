@@ -1,11 +1,3 @@
-try:
-    # Python 2
-    # noinspection PyCompatibility
-    from future_builtins import filter
-except ImportError:
-    # Python 3
-    pass
-
 
 def first(predicate_or_None, iterable, default=None):
     """

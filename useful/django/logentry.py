@@ -1,4 +1,3 @@
-from __future__ import unicode_literals
 
 from django import VERSION
 from django.contrib import admin
@@ -9,21 +8,15 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.forms import all_valid
 from django.template.defaultfilters import capfirst
+from django.utils.encoding import force_str
 from django.utils.safestring import mark_safe
 from django.utils.text import get_text_list
+from django.utils.translation import gettext_lazy as _
 
-from .readonly_admin import ReadOnlyModelAdmin
+from useful.django.readonly_admin import ReadOnlyModelAdmin
 
-# Get rid off warnings in Django 3
-if VERSION[0] >= 2:
-    from django.utils.encoding import force_str as force_text
-    from django.utils.translation import gettext_lazy as _
 
-    LogEntry.get_change_message.short_description = _("Changes in detail")
-else:
-    # @RemoveFromDjangoVersion2
-    from django.utils.encoding import force_text
-    from django.utils.translation import ugettext_lazy as _
+LogEntry.get_change_message.short_description = _("Changes in detail")
 
 
 UserModel = get_user_model()
@@ -83,7 +76,7 @@ class LogEntryAs(object):
             user_id=self.user.pk,
             content_type_id=ContentType.objects.get_for_model(object_, for_concrete_model=False).pk,
             object_id=object_.pk,
-            object_repr=force_text(object_),
+            object_repr=force_str(object_),
             action_flag=action_flag,
             change_message=change_message,
         )
@@ -157,16 +150,16 @@ class UILogEntry(object):
             change_message.append(_('Changed %s.') % lst)
 
         change_message = ' '.join(change_message)
-        return force_text(change_message or _('No fields changed.'))
+        return force_str(change_message or _('No fields changed.'))
 
     def do_log(self, object_, action_flag, message):
         LogEntry.objects.log_action(
             user_id=self.user.pk,
             content_type_id=ContentType.objects.get_for_model(object_).pk,
             object_id=object_.pk,
-            object_repr=force_text(object_),
+            object_repr=force_str(object_),
             action_flag=action_flag,
-            change_message=force_text(message),
+            change_message=force_str(message),
         )
 
     def save_form_instance_and_log(self, form):

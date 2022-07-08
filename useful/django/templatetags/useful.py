@@ -1,18 +1,14 @@
+
 import os
 import re
+import urllib.parse
 
 from django import VERSION, template
 from django.template.defaultfilters import stringfilter
 from django.utils.html import urlize
-from django.utils.http import urlquote_plus as django_urlquote_plus
 from django.utils.safestring import mark_safe
+from django.utils.encoding import force_str
 
-# Get rid off warnings in Django 3
-if VERSION[0] >= 2:
-    from django.utils.encoding import force_str as force_text
-else:
-    # @RemoveFromDjangoVersion2
-    from django.utils.encoding import force_text
 
 register = template.Library()
 
@@ -30,7 +26,7 @@ def querydict_set(querydict, param_name, param_value):
     querydict = querydict.copy()
 
     # Set or delete the value.
-    if force_text(param_value):
+    if force_str(param_value):
         querydict[param_name] = param_value
     else:
         querydict.pop(param_name, None)
@@ -68,7 +64,7 @@ def intspace(value):
     Converts an integer to a string containing spaces every three digits.
     For example, 3000 becomes '3 000' and 45000 becomes '45 000'.
     """
-    orig = force_text(value)
+    orig = force_str(value)
     new = INTSPACE_RE.sub(r'\g<1> \g<2>', orig)
     return new if orig == new else intspace(new)
 
@@ -111,7 +107,7 @@ def urlquote_plus(value, safe=None):
     kwargs = {}
     if safe is not None:
         kwargs['safe'] = safe
-    return django_urlquote_plus(value, **kwargs)
+    return urllib.parse.quote_plus(value, **kwargs)
 
 
 @register.filter

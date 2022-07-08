@@ -1,3 +1,4 @@
+
 import os
 import time
 import functools
@@ -101,7 +102,7 @@ class JsonResponse(HttpResponse):
 
         kwargs['content'] = json.dumps(response_data, indent=indent, ensure_ascii=ensure_ascii)
         kwargs['content_type'] = 'application/json; charset=UTF-8'
-        super(JsonResponse, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
 
 def protected_redirect(request):

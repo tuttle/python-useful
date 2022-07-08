@@ -1,6 +1,4 @@
 
-from django.contrib.auth import authenticate
-from django.contrib.auth.models import User
 from django.core.management import call_command
 from django.test import TestCase
 from django.test import override_settings

@@ -1,13 +1,6 @@
-from __future__ import division, print_function
 
 import bisect
 import hashlib
-import sys
-
-PY2 = sys.version_info[0] == 2
-
-# noinspection PyUnresolvedReferences,PyShadowingBuiltins
-range = xrange if PY2 else range
 
 
 class ConsistentHashRing(object):

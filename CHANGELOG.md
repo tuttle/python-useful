@@ -1,8 +1,11 @@
 # Changelog
 
 ## [dev]
-- Dropped support for Django <2.0
-- Dropped support for Python 2.7
+
+## [0.9.0]
+- Added support for Django 4.0
+- Dropped support for Django <3.2
+- Dropped support for Python 2.x
 - Fixed CachedAuthenticationMiddleware to comply with Django system check framework
 
 ## [0.8.8]

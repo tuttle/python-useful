@@ -1,22 +1,17 @@
+
 import os
 import posixpath
 import stat
-import sys
+from urllib.parse import unquote
 
 from django import template
 from django.conf import settings
 from django.contrib.staticfiles import finders, storage
 
-PY2 = sys.version_info[0] == 2
 
 register = template.Library()
 
 STATIC_URL_CACHE = {}
-
-if PY2:
-    from urllib import unquote
-else:
-    from urllib.parse import unquote
 
 
 @register.simple_tag

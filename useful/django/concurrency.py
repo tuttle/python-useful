@@ -1,22 +1,15 @@
+
 import hashlib
 
 from django import VERSION
 from django import forms
+from django.contrib.auth.forms import UserChangeForm
 from django.forms.utils import ErrorList
+from django.utils.encoding import force_str, smart_str
 from django.utils.safestring import mark_safe
 from django.utils.crypto import salted_hmac, constant_time_compare
-from django.contrib.auth.forms import UserChangeForm
+from django.utils.translation import gettext_lazy as _
 
-# Get rid off warnings in Django 3
-if VERSION[0] >= 2:
-    from django.utils.encoding import force_str as force_text
-    from django.utils.encoding import smart_str as smart_text
-    from django.utils.translation import gettext_lazy as _
-else:
-    # @RemoveFromDjangoVersion2
-    from django.utils.encoding import force_text
-    from django.utils.encoding import smart_text
-    from django.utils.translation import ugettext_lazy as _
 
 
 CONCURRENCY_EDIT_MESSAGE = _(
@@ -48,7 +41,7 @@ def _clean_object_version(slf):
         slf.data = slf.data.copy()    # make the data dict mutable first
         slf.data['object_version'] = ''
 
-    elif form_pk != force_text(pk):
+    elif form_pk != force_str(pk):
         raise RuntimeError(_("Found not matching primary key in object_version field."))
 
     if not slf.concurrency_problem:
@@ -57,7 +50,7 @@ def _clean_object_version(slf):
         if form_hash != db_hash:
             slf.concurrency_problem = \
                 _("In the mean time, someone <b>changed</b> this item in the database.") \
-                + ' ' + force_text(slf._CONCURRENCY_EDIT_MESSAGE)
+                + ' ' + force_str(slf._CONCURRENCY_EDIT_MESSAGE)
 
     if slf.concurrency_problem:
         errors = slf._errors.setdefault(forms.forms.NON_FIELD_ERRORS, ErrorList())
@@ -88,7 +81,7 @@ class ConcurrencyProtectionModelForm(forms.ModelForm):
     object_version = forms.CharField(required=False, widget=forms.HiddenInput)
 
     def __init__(self, *args, **kwargs):
-        super(ConcurrencyProtectionModelForm, self). __init__(*args, **kwargs)
+        super(). __init__(*args, **kwargs)
         self.concurrency_problem = None
         self.fields['object_version'].initial = _gen_object_version(self.instance)
 
@@ -109,7 +102,7 @@ class ConcurrencyProtectionModelForm(forms.ModelForm):
 #     The admin form will be monkey patched with the protection field.
 #     """
 #     def get_form(self, request, obj=None, **kwargs):
-#         form = super(ConcurrencyProtectionModelAdmin, self).get_form(request, obj, **kwargs)
+#         form = super().get_form(request, obj, **kwargs)
 #
 #         if obj is not None:
 #             form.concurrency_problem = None
@@ -140,7 +133,7 @@ class ConcurrencyProtectionUserChangeForm(UserChangeForm):
     object_version = forms.CharField(required=False, widget=forms.HiddenInput)
 
     def __init__(self, *args, **kwargs):
-        super(ConcurrencyProtectionUserChangeForm, self). __init__(*args, **kwargs)
+        super(). __init__(*args, **kwargs)
         self.concurrency_problem = None
         self.fields['object_version'].initial = _gen_object_version(self.instance)
 
@@ -150,15 +143,15 @@ class ConcurrencyProtectionUserChangeForm(UserChangeForm):
 
 
 def _gen_hmac(pk, hash_):
-    pk = smart_text(pk).encode('UTF-8')
-    hash_ = smart_text(hash_).encode('UTF-8')
+    pk = smart_str(pk).encode('UTF-8')
+    hash_ = smart_str(hash_).encode('UTF-8')
     return salted_hmac('concurrency prot', '%s %s' % (pk, hash_)).hexdigest()
 
 
 def _gen_object_hash(obj):
     def get_obj_data():
         for k, v in sorted(forms.models.model_to_dict(obj).items()):
-            yield u'%s=%s' % (smart_text(k), smart_text(v))
+            yield u'%s=%s' % (smart_str(k), smart_str(v))
 
     data = u' '.join(get_obj_data()).encode('UTF-8')
     return hashlib.sha256(data).hexdigest()

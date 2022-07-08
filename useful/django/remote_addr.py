@@ -1,13 +1,9 @@
+
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 
-try:
-    from django.utils.deprecation import MiddlewareMixin
-except ImportError:  # Django < 1.10
-    MiddlewareMixin = object
 
-
-class SetRemoteAddrMiddleware(MiddlewareMixin):
+class SetRemoteAddrMiddleware:
     """
     Request middleware that sets REMOTE_ADDR based on request.META variable
     pointed by settings.REAL_IP_META_VARIABLE_NAME.
@@ -26,7 +22,10 @@ class SetRemoteAddrMiddleware(MiddlewareMixin):
 
     then will get the real remote IP address to REMOTE_ADDR.
     """
-    def process_request(self, request):
+    def __init__(self, get_response):
+        self.get_response = get_response
+    
+    def __call__(self, request):
         try:
             real_ip_varname = settings.REAL_IP_META_VARIABLE_NAME
         except AttributeError:
@@ -36,3 +35,5 @@ class SetRemoteAddrMiddleware(MiddlewareMixin):
 
         if real_ip_varname is not None:
             request.META['REMOTE_ADDR'] = request.META[real_ip_varname]
+
+        return self.get_response(request)

@@ -1,19 +1,12 @@
+
 from functools import wraps
 import hashlib
-import sys
 
 from django.core import cache  # Importing this way so debug_toolbar can patch it later.
 from django.core.cache.backends.base import DEFAULT_TIMEOUT
 
 
-PY2 = sys.version_info[0] == 2
-
-
-if PY2:
-    # noinspection PyUnresolvedReferences
-    ALLOWED_CACHED_FUNCTION_ARG_TYPES = {type(None), int, float, long, bool, str, unicode}
-else:
-    ALLOWED_CACHED_FUNCTION_ARG_TYPES = {type(None), int, float, bool, str, bytes}
+ALLOWED_CACHED_FUNCTION_ARG_TYPES = {type(None), int, float, bool, str, bytes}
 
 
 def cached_function(func=None, num_args_to_key=None, timeout=DEFAULT_TIMEOUT):
