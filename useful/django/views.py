@@ -1,15 +1,14 @@
-
+import functools
 import os
 import time
-import functools
 
 import django
 from django import shortcuts
 from django.conf import settings
-from django.core.paginator import Paginator, EmptyPage, InvalidPage
-from django.urls import reverse
-from django.http.response import HttpResponse, HttpResponseBase, HttpResponseRedirect, HttpResponseBadRequest
+from django.core.paginator import EmptyPage, InvalidPage, Paginator
+from django.http.response import HttpResponse, HttpResponseBadRequest, HttpResponseBase, HttpResponseRedirect
 from django.template import RequestContext
+from django.urls import reverse
 
 from .crypto import SecretTokenGenerator
 
@@ -62,7 +61,7 @@ def page(template=None, **decorator_args):
                 data.update(response_dict)
 
             # The view can override the template to use.
-            template_name = data.get('template',  template)
+            template_name = data.get('template', template)
 
             # By adding the debug_template parameter we switch to possible debugging template:
             # payments/payments_info.html -> payments/payments_info_debug.html

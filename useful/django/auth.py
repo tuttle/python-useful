@@ -1,11 +1,9 @@
-
-from django.contrib.auth.backends import ModelBackend
-from django.core.validators import validate_email, ValidationError
-from django.utils.crypto import get_random_string
 from django.contrib.auth import get_user_model
+from django.contrib.auth.backends import ModelBackend
+from django.core.validators import ValidationError, validate_email
+from django.utils.crypto import get_random_string
 
 from useful.django.getters import get_object_or_none
-
 
 UserModel = get_user_model()
 
@@ -56,7 +54,7 @@ class EmailLoginModelBackend(ModelBackend):
 
         return user
 
-    def authenticate(self, request, username=None, password=None):
+    def authenticate(self, request, username=None, password=None, **kwargs):
         user = self.get_user_by_email(username)
         return user if user and user.check_password(password) else None
 
@@ -71,7 +69,7 @@ class UsernameOrEmailLoginModelBackend(EmailLoginModelBackend):
     """
     USERNAME_CASE_SENSITIVE = False
 
-    def authenticate(self, request, username=None, password=None):
+    def authenticate(self, request, username=None, password=None, **kwargs):
         if self.USERNAME_CASE_SENSITIVE:
             user = get_object_or_none(UserModel, username__exact=username)
         else:

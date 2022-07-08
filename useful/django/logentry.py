@@ -1,5 +1,3 @@
-
-from django import VERSION
 from django.contrib import admin
 from django.contrib.admin.models import ADDITION, CHANGE, DELETION, LogEntry
 from django.contrib.admin.utils import construct_change_message

@@ -1,11 +1,7 @@
-
 from functools import lru_cache
 
 from django.core.exceptions import PermissionDenied
-from django.urls import NoReverseMatch
-from django.urls import get_callable
-from django.urls import get_resolver
-from django.urls import URLResolver
+from django.urls import NoReverseMatch, URLResolver, get_callable, get_resolver
 from django.urls.base import get_urlconf
 
 

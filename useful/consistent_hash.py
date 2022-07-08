@@ -1,4 +1,3 @@
-
 import bisect
 import hashlib
 

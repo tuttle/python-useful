@@ -1,4 +1,5 @@
 
+# noinspection PyPep8Naming
 def first(predicate_or_None, iterable, default=None):
     """
     Returns the first item of iterable for which predicate(item) is true.
@@ -18,6 +19,7 @@ def int_or_0(value):
         return 0
 
 
+# noinspection PyPep8Naming
 def int_or_None(value):
     try:
         return int(value)

@@ -1,4 +1,3 @@
-
 import itertools
 import operator
 from collections import defaultdict
@@ -82,7 +81,7 @@ def iter_compare_dicts(dict1, dict2, only_common_keys=False, comparison_op=opera
 
 def iter_ibatches(iterable, size):
     """
-    http://code.activestate.com/recipes/303279-getting-items-in-batches/
+    https://code.activestate.com/recipes/303279-getting-items-in-batches/
 
     Generates iterators of elements of fixed size from the source iterable. Does not create batch sequences in memory.
     The source iterable can be of an unknown arbitrary length, does not need to support anything else than iteration.

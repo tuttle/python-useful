@@ -1,10 +1,8 @@
-
-from functools import wraps
 import hashlib
+from functools import wraps
 
 from django.core import cache  # Importing this way so debug_toolbar can patch it later.
 from django.core.cache.backends.base import DEFAULT_TIMEOUT
-
 
 ALLOWED_CACHED_FUNCTION_ARG_TYPES = {type(None), int, float, bool, str, bytes}
 
@@ -41,16 +39,16 @@ def cached_function(func=None, num_args_to_key=None, timeout=DEFAULT_TIMEOUT):
         @cached_function(num_args_to_key=2)
 
     """
-    def cached_function_inner(func):
-        if func.__defaults__:
+    def cached_function_inner(fn):
+        if getattr(fn, '__defaults__'):
             raise RuntimeError("cached_function does not allow function to have default args "
                                "in order to keep the number of passed args fixed.")
 
-        if func.__name__ == '<lambda>':
+        if getattr(fn, '__name__') == '<lambda>':
             raise RuntimeError("cached_function can't work on anonymous funcs in order "
                                "to keep the name unique.")
 
-        @wraps(func)
+        @wraps(fn)
         def wrapper(*args):
             key_args = args if num_args_to_key is None else args[:num_args_to_key]
 
@@ -59,7 +57,7 @@ def cached_function(func=None, num_args_to_key=None, timeout=DEFAULT_TIMEOUT):
                 raise RuntimeError("cached_function received unallowed types of keyable args: %s"
                                    % ', '.join(map(str, unallowed_types)))
 
-            key_fmt = 'cached_function:%s.%s(%%s)' % (func.__module__, func.__name__)
+            key_fmt = 'cached_function:%s.%s(%%s)' % (fn.__module__, fn.__name__)
             key_args_repr = ','.join(map(repr, key_args))
             key = key_fmt % key_args_repr
 
@@ -68,13 +66,14 @@ def cached_function(func=None, num_args_to_key=None, timeout=DEFAULT_TIMEOUT):
                     key_args_bytestring = key_args_repr.encode('utf-8')
                 else:
                     key_args_bytestring = key_args_repr
+
                 key_args = hashlib.sha256(key_args_bytestring).hexdigest()
                 key = key_fmt % key_args + '-hashed'
 
             value = cache.cache.get(key)
 
             if value is None:
-                value = func(*args)
+                value = fn(*args)
 
                 cache.cache.set(key, value, timeout=timeout)
 

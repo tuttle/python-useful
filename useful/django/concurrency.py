@@ -1,16 +1,12 @@
-
 import hashlib
 
-from django import VERSION
 from django import forms
 from django.contrib.auth.forms import UserChangeForm
 from django.forms.utils import ErrorList
+from django.utils.crypto import constant_time_compare, salted_hmac
 from django.utils.encoding import force_str, smart_str
 from django.utils.safestring import mark_safe
-from django.utils.crypto import salted_hmac, constant_time_compare
 from django.utils.translation import gettext_lazy as _
-
-
 
 CONCURRENCY_EDIT_MESSAGE = _(
     "<br><b>WARNING:</b> Your changes are almost LOST now and can't be saved.<br><em>But you still can copy the values "
@@ -45,14 +41,17 @@ def _clean_object_version(slf):
         raise RuntimeError(_("Found not matching primary key in object_version field."))
 
     if not slf.concurrency_problem:
+        # noinspection PyProtectedMember
         db_obj = slf._meta.model.objects.get(pk=pk)
         db_hash = _gen_object_hash(db_obj)
         if form_hash != db_hash:
+            # noinspection PyProtectedMember
             slf.concurrency_problem = \
                 _("In the mean time, someone <b>changed</b> this item in the database.") \
                 + ' ' + force_str(slf._CONCURRENCY_EDIT_MESSAGE)
 
     if slf.concurrency_problem:
+        # noinspection PyProtectedMember
         errors = slf._errors.setdefault(forms.forms.NON_FIELD_ERRORS, ErrorList())
         errors.append(mark_safe(slf.concurrency_problem))
 

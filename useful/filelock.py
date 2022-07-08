@@ -1,10 +1,8 @@
-
 import errno
 import os
 import sys
 import time
 from functools import wraps
-
 
 # Based on http://www.evanfosmark.com/2009/01/cross-platform-file-locking-support-in-python/
 

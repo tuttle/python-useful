@@ -1,5 +1,3 @@
-
-from django import VERSION
 from django.utils.crypto import constant_time_compare, salted_hmac
 from django.utils.encoding import smart_str
 

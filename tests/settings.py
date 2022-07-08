@@ -1,10 +1,10 @@
-from django.conf.global_settings import *
+from django.conf.global_settings import *  # noqa
 
 
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": "mem_db"
+        "NAME": "mem_db",
     }
 }
 
@@ -16,7 +16,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.sites",
     "useful.django",
-    "tests.testapp.apps.TestAppConfig"
+    "tests.testapp.apps.TestAppConfig",
 ]
 
 SECRET_KEY = 'justfortests'

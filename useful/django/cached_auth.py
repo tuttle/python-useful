@@ -25,27 +25,28 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 
+from django.apps import apps
 from django.conf import settings
-from django.contrib.auth import SESSION_KEY, get_user
+from django.contrib.auth import SESSION_KEY, get_user, get_user_model
 from django.contrib.auth.middleware import AuthenticationMiddleware
-from django.contrib.auth import get_user_model
 from django.core import cache  # Importing this way so debug_toolbar can patch it later.
-from django.db import models
 from django.db.models.signals import post_delete, post_save
 from django.utils.functional import SimpleLazyObject
-
 
 UserModel = get_user_model()
 
 CACHE_KEY = 'cached_auth_middleware_1.5:%s'
 
+# The profile model support have been deprecated in Django long time ago.
+# Nevertheless some projects might still be using it.
 try:
     app_label, model_name = settings.AUTH_PROFILE_MODULE.split('.')
-    profile_model = models.get_model(app_label, model_name)
+    profile_model = apps.get_model(app_label, model_name)
 except (ValueError, AttributeError):
     profile_model = None
 
 
+# noinspection PyUnusedLocal
 def invalidate_cache(sender, instance, **kwargs):
     if isinstance(instance, UserModel):
         key = CACHE_KEY % instance.id
@@ -80,6 +81,7 @@ def get_cached_user(request):
 
         request._cached_user = user
 
+    # noinspection PyProtectedMember
     return request._cached_user
 
 

@@ -1,4 +1,3 @@
-
 from django.http import QueryDict
 from django.template.loader import render_to_string
 from django.test import TestCase

@@ -3,9 +3,9 @@
 ## [dev]
 
 ## [0.9.0]
-- Added support for Django 4.0
-- Dropped support for Django <3.2
 - Dropped support for Python 2.x
+- Dropped support for Django <3.2
+- Added support for Django 4.0
 - Fixed CachedAuthenticationMiddleware to comply with Django system check framework
 
 ## [0.8.8]

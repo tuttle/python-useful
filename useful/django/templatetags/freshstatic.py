@@ -1,4 +1,3 @@
-
 import os
 import posixpath
 import stat
@@ -7,7 +6,6 @@ from urllib.parse import unquote
 from django import template
 from django.conf import settings
 from django.contrib.staticfiles import finders, storage
-
 
 register = template.Library()
 

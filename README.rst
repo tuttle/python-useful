@@ -5,6 +5,8 @@ python-useful
 A collection of utilities of everyday use when writing
 Python 3.x code *or* Django 3.2+ projects.
 
+**Python 2.x support has been dropped.**
+
 Overview
 --------
 
@@ -27,11 +29,7 @@ Install either using pip::
 
     pip install useful
 
-Or using e-i::
-
-    easy_install useful
-
-Or from source::
+or from source::
 
     git clone https://github.com/tuttle/python-useful src/useful
     cd src/useful

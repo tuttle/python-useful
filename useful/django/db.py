@@ -1,4 +1,3 @@
-
 from django.db import connection
 
 
@@ -7,6 +6,7 @@ def truncate_table(model_or_tablename, cascade=False, cursor=None):
         cursor = connection.cursor()
 
     if hasattr(model_or_tablename, '_meta'):
+        # noinspection PyProtectedMember
         tablename = model_or_tablename._meta.db_table
     else:
         tablename = model_or_tablename

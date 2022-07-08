@@ -1,4 +1,3 @@
-
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 
@@ -24,7 +23,7 @@ class SetRemoteAddrMiddleware:
     """
     def __init__(self, get_response):
         self.get_response = get_response
-    
+
     def __call__(self, request):
         try:
             real_ip_varname = settings.REAL_IP_META_VARIABLE_NAME

@@ -1,6 +1,6 @@
 import atexit
-import grp
 import logging.handlers
+import grp
 import os
 import pwd
 import signal
@@ -59,7 +59,7 @@ def install_termination_logging_signal_handlers():
         if s not in (signal.SIGCHLD, signal.SIGURG, signal.SIGWINCH):
             try:
                 signal.signal(s, sig_handler)
-            except:
+            except:  # noqa
                 pass
 
 
@@ -88,7 +88,7 @@ def setup_pidfile(pidfile_path):
         try:
             logging.debug("Removing PID file %s." % pidfile_path_)
             os.unlink(pidfile_path_)
-        except:
+        except:  # noqa
             logging.error("Cannot remove PID file %s." % pidfile_path_)
 
     if os.path.exists(pidfile_path):

@@ -1,8 +1,6 @@
-
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
-from django.test import TestCase
-from django.test import override_settings
+from django.test import TestCase, override_settings
 
 
 @override_settings(AUTHENTICATION_BACKENDS=['useful.django.auth.EmailLoginModelBackend', ])

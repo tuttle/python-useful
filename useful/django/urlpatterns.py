@@ -1,26 +1,15 @@
-
-from functools import wraps
-from functools import WRAPPER_ASSIGNMENTS
 import re
+from functools import wraps
 from urllib.parse import urlparse
 
 from django.conf import settings
-from django.urls import re_path
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import resolve_url
+from django.urls import re_path
 from django.utils.encoding import force_str
-from sys import version_info
 
-
-def available_attrs(fn):
-    """
-    Return the list of functools-wrappable attributes on a callable.
-    This is required as a workaround for http://bugs.python.org/issue3445
-    under Python 2.
-    TODO: still relevant in py3?
-    """
-    return WRAPPER_ASSIGNMENTS
+NOT_GIVEN = object()
 
 
 class UrlPatterns(list):
@@ -175,7 +164,7 @@ class UrlPatterns(list):
         self.raise_exception = raise_exception
         self.redirect_field_name = redirect_field_name or REDIRECT_FIELD_NAME
 
-    def url(self, regex, kwargs=None, name=(), perms=None):
+    def url(self, regex, kwargs=None, name=NOT_GIVEN, perms=None):
         def decorator(view_func):
             if perms is None:
                 _wrapped = view_func
@@ -191,7 +180,7 @@ class UrlPatterns(list):
                 _wrapped.can_url_perms_compiled = compiled_anded_perms
 
             # Assigning different name to avoid changing the nonlocal variable.
-            url_name = view_func.__name__ if name is () else name
+            url_name = view_func.__name__ if name is NOT_GIVEN else name
             self.append(re_path(regex, _wrapped, kwargs=kwargs, name=url_name))
 
             return _wrapped
@@ -223,7 +212,7 @@ class UrlPatterns(list):
         Extended with passing the resolved aliased permissions to the view.
         """
         def decorator(view_func):
-            @wraps(view_func, assigned=available_attrs(view_func))
+            @wraps(view_func)
             def _wrapped_view(request, *args, **kwargs):
                 perm_aliases = test_func(request.user)
                 if perm_aliases:
@@ -242,8 +231,8 @@ class UrlPatterns(list):
                 # use the path as the "next" url.
                 login_scheme, login_netloc = urlparse(resolved_login_url)[:2]
                 current_scheme, current_netloc = urlparse(path)[:2]
-                if ((not login_scheme or login_scheme == current_scheme) and
-                   (not login_netloc or login_netloc == current_netloc)):
+                if ((not login_scheme or login_scheme == current_scheme)
+                        and (not login_netloc or login_netloc == current_netloc)):
                     path = request.get_full_path()
                 from django.contrib.auth.views import redirect_to_login
                 return redirect_to_login(path, resolved_login_url,

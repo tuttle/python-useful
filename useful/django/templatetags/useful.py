@@ -1,14 +1,12 @@
-
 import os
 import re
 import urllib.parse
 
-from django import VERSION, template
+from django import template
 from django.template.defaultfilters import stringfilter
+from django.utils.encoding import force_str
 from django.utils.html import urlize
 from django.utils.safestring import mark_safe
-from django.utils.encoding import force_str
-
 
 register = template.Library()
 
