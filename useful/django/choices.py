@@ -56,7 +56,7 @@ class Choices:
 
     def choices(self):
         ch = list(
-            self.defs.values()
+            self.defs.values(),
         )
         ch.sort(
             key=lambda x: x[0],
@@ -69,7 +69,7 @@ class Choices:
         """
         return self.defs.get(
             name,
-            (default,)
+            (default,),
         )[0]
 
     def __getattr__(self, name):
@@ -108,6 +108,7 @@ class Choices:
             keys = [keys]
 
         return Choices(
-            **dict((k, self.defs[k])
-                   for k in keys if k in self.defs)
-        )
+            **{
+                k: self.defs[k]
+                for k in keys if k in self.defs},
+            )

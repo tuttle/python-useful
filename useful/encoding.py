@@ -1,5 +1,6 @@
+import codecs
+import sys
 import unicodedata
-
 
 GUESS_ENCODINGS_SEQUENCE = (
     'UTF-8',
@@ -14,6 +15,7 @@ def guess_decode(s, fallback_method='replace'):
             return s.decode(enc)
         except UnicodeDecodeError:
             pass
+
     return s.decode('UTF-8', fallback_method)
 
 
@@ -25,8 +27,6 @@ def strip_accents(unistr):
 
 
 def encoded_stream(stream, into='UTF-8'):
-    import codecs
-
     if (stream.encoding or '').upper() != into.upper():
         stream = codecs.getwriter(into)(stream)
 
@@ -38,7 +38,5 @@ def auto_encode_stdout_stderr(into='UTF-8'):
     Call this on the top of your program to avoid the need of encoding each printed
     unicode object when the output encoding is not known such as during shell redirection.
     """
-    import sys
-
     sys.stdout = encoded_stream(sys.stdout, into)
     sys.stderr = encoded_stream(sys.stderr, into)

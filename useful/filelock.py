@@ -7,7 +7,7 @@ from functools import wraps
 # Based on http://www.evanfosmark.com/2009/01/cross-platform-file-locking-support-in-python/
 
 
-class FileLockTimeoutException(Exception):
+class FileLockTimeoutException(Exception):  # noqa: N818
     pass
 
 
@@ -82,7 +82,7 @@ class FileLock:
                             open(self.lockfile).read(512),
                             sys.argv,
                         )
-                    raise FileLockTimeoutException(msg)
+                    raise FileLockTimeoutException(msg) from e
 
                 time.sleep(self.delay)
 
@@ -120,7 +120,7 @@ class FileLock:
             except ValueError:
                 # We don't steal if the lockfile is empty of contains an invalid JSON value.
                 pass
-            except IOError as e:
+            except OSError as e:
                 # We ignore when the lockfile was removed between the exclusive open and load.
                 if e.errno != errno.ENOENT:
                     raise

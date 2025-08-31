@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.backends import ModelBackend
-from django.core.validators import ValidationError, validate_email
+from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
 from django.utils.crypto import get_random_string
 
 from useful.django.getters import get_object_or_none

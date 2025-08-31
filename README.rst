@@ -3,7 +3,7 @@ python-useful
 =============
 
 A collection of utilities of everyday use when writing
-Python 3.x code *or* Django 3.2+ projects.
+Python 3.10+ code *or* Django 4.2+ projects.
 
 **Python 2.x support has been dropped.**
 
@@ -25,15 +25,9 @@ in the docstring of each utility.
 Installation
 ------------
 
-Install either using pip::
+Using pip::
 
     pip install useful
-
-or from source::
-
-    git clone https://github.com/tuttle/python-useful src/useful
-    cd src/useful
-    python setup.py develop
 
 If you are about to use the Django features like the templatetags,
 you can add to ``INSTALLED_APPS``::
@@ -44,4 +38,5 @@ you can add to ``INSTALLED_APPS``::
     )
 
 Please file an Issue on GitHub if you have bugreport, tip, anything.
+
 Thank you!

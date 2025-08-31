@@ -1,7 +1,7 @@
 from collections import OrderedDict
 
 
-class AttrDictSetCollision(Exception):
+class AttrDictSetCollision(Exception):  # noqa: N818
     """
     Raised when the AttrDict refuses to change any dict's attribute.
     """
@@ -21,8 +21,8 @@ class AttrDict(dict):
     def __getattr__(self, name):
         try:
             return super().__getitem__(name)
-        except KeyError:
-            raise AttributeError("'AttrDict' object has no attribute or key '%s'" % name)
+        except KeyError as exc:
+            raise AttributeError("'AttrDict' object has no attribute or key '%s'" % name) from exc
 
     def __getstate__(self):
         return self.__dict__.copy()
@@ -34,7 +34,7 @@ class AttrDict(dict):
         return "%s(%s)" % (self.__class__.__name__, dict.__repr__(self))
 
 
-class OrderedAttrDictSetCollision(Exception):
+class OrderedAttrDictSetCollision(Exception):  # noqa: N818
     """
     Raised when the OrderedAttrDict refuses to change any OrderedDict's attribute.
     """
@@ -55,6 +55,7 @@ class OrderedAttrDict(OrderedDict):
             raise OrderedAttrDictSetCollision(name)
 
         self[name] = value
+        return None
 
     def __getattr__(self, name):
         """
@@ -62,5 +63,5 @@ class OrderedAttrDict(OrderedDict):
         """
         try:
             return self.__getitem__(name)
-        except KeyError:
-            raise AttributeError("'OrderedAttrDict' object has no attribute or key '%s'" % name)
+        except KeyError as exc:
+            raise AttributeError("'OrderedAttrDict' object has no attribute or key '%s'" % name) from exc

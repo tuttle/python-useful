@@ -1,11 +1,10 @@
-from django.conf.global_settings import *  # noqa
-
+from django.conf.global_settings import *  # noqa: F403  # pylint: disable=wildcard-import,unused-wildcard-import
 
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": "mem_db",
-    }
+    },
 }
 
 INSTALLED_APPS = [
@@ -31,9 +30,9 @@ TEMPLATES = [
             'context_processors': [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-            ]
-        }
-    }
+            ],
+        },
+    },
 ]
 
 MIDDLEWARE = [
@@ -49,5 +48,5 @@ MIDDLEWARE = [
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-    }
+    },
 }

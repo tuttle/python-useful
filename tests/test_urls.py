@@ -11,9 +11,9 @@ TEMPLATES = [
         'OPTIONS': {
             'context_processors': [
                 'useful.django.can_url.can_url_processor',
-            ]
-        }
-    }
+            ],
+        },
+    },
 ]
 
 
@@ -49,9 +49,9 @@ class CanUrlTest(TestCase):
             response,
             '%s?next=%s' % (
                 settings.LOGIN_URL,
-                reverse('testapp:restricted_view')
+                reverse('testapp:restricted_view'),
             ),
-            fetch_redirect_response=False
+            fetch_redirect_response=False,
         )
 
     def test_returns_rendered_template_if_perm_ok(self):

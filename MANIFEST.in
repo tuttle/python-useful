@@ -1,9 +1,4 @@
-include MANIFEST.in
-include README.rst
-include setup.py
 include LICENSE
-
-recursive-include useful *
-
-global-exclude *.pyc
-global-exclude *.pyo
+include README.rst
+recursive-include useful/django/locale *.po *.mo
+global-exclude __pycache__ *.py[cod] .DS_Store

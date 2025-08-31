@@ -1,6 +1,5 @@
 from django.http import HttpResponse
 from django.shortcuts import render
-
 from useful.django.urlpatterns import UrlPatterns
 from useful.django.views import page
 
@@ -20,9 +19,9 @@ def other_view(request):
 
 @page('simple_template.html')
 def template_view(request):
-    return dict(
-        foo='bar',
-    )
+    return {
+        'foo': 'bar',
+    }
 
 
 @urlpatterns.url(r'^restricted/$', perms='auth.can_pass')

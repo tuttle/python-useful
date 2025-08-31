@@ -218,7 +218,9 @@ class UrlPatterns(list):
                 if perm_aliases:
                     perm_aliases.discard(True)
                     for alias in perm_aliases:
-                        assert alias not in kwargs
+                        if alias in kwargs:
+                            raise RuntimeError("Alias %r is already present in kwargs." % alias)
+
                         kwargs[alias] = True
                     return view_func(request, *args, **kwargs)
 
@@ -243,7 +245,7 @@ class UrlPatterns(list):
     def _can_url(self, compiled_anded_perms, user):
         res = set()
         for ored_perms in compiled_anded_perms:
-            res2 = set(alias for perm, alias in ored_perms if self.test_perm(perm, user))
+            res2 = {alias for perm, alias in ored_perms if self.test_perm(perm, user)}
             if not res2:
                 if self.raise_exception:
                     raise PermissionDenied

@@ -2,18 +2,19 @@ import functools
 import os
 import time
 
-import django
-from django import shortcuts
 from django.conf import settings
 from django.core.paginator import EmptyPage, InvalidPage, Paginator
 from django.http.response import HttpResponse, HttpResponseBadRequest, HttpResponseBase, HttpResponseRedirect
 from django.template import RequestContext
 from django.urls import reverse
 
+import django
+from django import shortcuts
+
 from .crypto import SecretTokenGenerator
 
 
-class HttpResponseException(Exception):
+class HttpResponseException(Exception):  # noqa: N818
     """
     An abstract exception allowing any kind of exception under page decorator to be converted
     to a HttpResponse<Anything>.
@@ -84,7 +85,7 @@ def page(template=None, **decorator_args):
                 response = shortcuts.render(
                     request,
                     template_name,
-                    context=data
+                    context=data,
                 )
 
             return response
@@ -126,8 +127,8 @@ def protected_redirect(request):
     <script>window.location.replace("%s");
     </script>
 </body></html>''' % (u, u, u, u))
-    else:
-        return HttpResponseBadRequest("Bad parameters or protection fault.")
+
+    return HttpResponseBadRequest("Bad parameters or protection fault.")
 
 
 def serve_with_Expires(request, path, cache_timeout=365 * 24 * 60 * 60):
@@ -146,8 +147,8 @@ def serve_with_Expires(request, path, cache_timeout=365 * 24 * 60 * 60):
     By adding a cache_timeout parameter to the above call with the number
     of seconds you will change the deafult expiration of 1 year.
     """
-    from django.utils.http import http_date
     from django.contrib.staticfiles.views import serve
+    from django.utils.http import http_date
 
     response = serve(request, path)
 

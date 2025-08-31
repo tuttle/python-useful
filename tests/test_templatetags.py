@@ -8,24 +8,24 @@ class TemplateTagsTest(TestCase):
     def test_useful_tags(self):
         body_lines = render_to_string(
             'template_for_tags.html',
-            context=dict(
-                querydict=QueryDict('a=12&b=13'),
-                map1={
+            context={
+                'querydict': QueryDict('a=12&b=13'),
+                'map1': {
                     'key1': 'KEY',
                 },
-                int1=300,
-                int2=3000,
-                int3=30000,
-                int4=300000,
-                int1m=-300,
-                int2m=-3000,
-                int3m=-30000,
-                int4m=-300000,
-                string1='test',
-                string2='TEST',
-                begin='te',
-                path='/etc/passwd/shadow',
-            )
+                'int1': 300,
+                'int2': 3000,
+                'int3': 30000,
+                'int4': 300000,
+                'int1m': -300,
+                'int2m': -3000,
+                'int3m': -30000,
+                'int4m': -300000,
+                'string1': 'test',
+                'string2': 'TEST',
+                'begin': 'te',
+                'path': '/etc/passwd/shadow',
+            },
         ).strip().split('\n')
 
         expected_lines = (
@@ -45,7 +45,7 @@ class TemplateTagsTest(TestCase):
             'shadow',
         )
 
-        for bl, el in zip(body_lines, expected_lines):
+        for bl, el in zip(body_lines, expected_lines, strict=True):
             if isinstance(el, tuple):
                 self.assertIn(bl, el)
             else:

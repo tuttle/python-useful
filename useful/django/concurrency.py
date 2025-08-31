@@ -1,6 +1,5 @@
 import hashlib
 
-from django import forms
 from django.contrib.auth.forms import UserChangeForm
 from django.forms.utils import ErrorList
 from django.utils.crypto import constant_time_compare, salted_hmac
@@ -8,9 +7,11 @@ from django.utils.encoding import force_str, smart_str
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 
+from django import forms
+
 CONCURRENCY_EDIT_MESSAGE = _(
     "<br><b>WARNING:</b> Your changes are almost LOST now and can't be saved.<br><em>But you still can copy the values "
-    "out manually now.</em><br>Then you can <a href=''>RELOAD</a> and edit again."
+    "out manually now.</em><br>Then you can <a href=''>RELOAD</a> and edit again.",
 )
 
 
@@ -150,9 +151,9 @@ def _gen_hmac(pk, hash_):
 def _gen_object_hash(obj):
     def get_obj_data():
         for k, v in sorted(forms.models.model_to_dict(obj).items()):
-            yield u'%s=%s' % (smart_str(k), smart_str(v))
+            yield '%s=%s' % (smart_str(k), smart_str(v))
 
-    data = u' '.join(get_obj_data()).encode('UTF-8')
+    data = ' '.join(get_obj_data()).encode('UTF-8')
     return hashlib.sha256(data).hexdigest()
 
 
@@ -166,7 +167,7 @@ def _gen_object_version(obj):
         return ''
 
     hash_ = _gen_object_hash(obj)
-    return u'%s-%s-%s' % (obj.pk, hash_, _gen_hmac(obj.pk, hash_))
+    return '%s-%s-%s' % (obj.pk, hash_, _gen_hmac(obj.pk, hash_))
 
 
 def _validate_object_version(datadict):
@@ -177,8 +178,8 @@ def _validate_object_version(datadict):
             form_pk, form_hash, form_hmac = form_version.split('-', 2)
             if not form_pk or not form_hash or not form_hmac:
                 raise ValueError
-        except ValueError:
-            raise forms.ValidationError("Bad object_version format.")
+        except ValueError as exc:
+            raise forms.ValidationError("Bad object_version format.") from exc
 
         if not constant_time_compare(form_hmac, _gen_hmac(form_pk, form_hash)):
             raise forms.ValidationError(_("Version protection tampered."))

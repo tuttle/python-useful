@@ -2,11 +2,12 @@ import os
 import re
 import urllib.parse
 
-from django import template
 from django.template.defaultfilters import stringfilter
 from django.utils.encoding import force_str
 from django.utils.html import urlize
 from django.utils.safestring import mark_safe
+
+from django import template
 
 register = template.Library()
 
@@ -77,7 +78,7 @@ def startswith(s1, s2):
 
 @register.filter
 @stringfilter
-def urlizetruncblank(value, limit, autoescape=None):
+def urlizetruncblank(value, limit, autoescape=False):
     """
     Converts URLs in text into clickable links, truncating URLs to the given character
     limit, and adding 'rel=nofollow' attribute to discourage spamming.
@@ -110,7 +111,7 @@ def urlquote_plus(value, safe=None):
 
 @register.filter
 @stringfilter
-def middle_truncate(value, size):
+def middle_truncate(value: str, size) -> str:
     """
     Truncates a string to the given size placing the ellipsis in the middle.
     """
@@ -119,11 +120,10 @@ def middle_truncate(value, size):
         if size > 3:
             start = (size - 3) / 2
             end = (size - 3) - start
-            return value[:start] + u'\u2026' + value[-end:]
-        else:
-            return value[:size] + u'\u2026'
-    else:
-        return value
+            return value[:start] + '\u2026' + value[-end:]
+        return value[:size] + '\u2026'
+
+    return value
 
 
 @register.filter

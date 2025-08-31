@@ -27,10 +27,10 @@ class SetRemoteAddrMiddleware:
     def __call__(self, request):
         try:
             real_ip_varname = settings.REAL_IP_META_VARIABLE_NAME
-        except AttributeError:
+        except AttributeError as exc:
             raise ImproperlyConfigured(
-                "%s: Missing the required setting REAL_IP_META_VARIABLE_NAME." % self.__class__.__name__
-            )
+                "%s: Missing the required setting REAL_IP_META_VARIABLE_NAME." % self.__class__.__name__,
+            ) from exc
 
         if real_ip_varname is not None:
             request.META['REMOTE_ADDR'] = request.META[real_ip_varname]

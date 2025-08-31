@@ -13,14 +13,13 @@ from django.utils.translation import gettext_lazy as _
 
 from useful.django.readonly_admin import ReadOnlyModelAdmin
 
-
 LogEntry.get_change_message.short_description = _("Changes in detail")
 
 
 UserModel = get_user_model()
 
 
-class LogEntryAs(object):
+class LogEntryAs:
     """
     This creates the LogEntry items for actions on objects.
     Similar to how ModelAdmin does it. This class is more universal to embrace various scenarios.
@@ -97,7 +96,7 @@ class LogEntryAs(object):
             self.log_change(form.instance, message_list)
 
 
-class UILogEntry(object):
+class UILogEntry:
     """
     Deprecated, you should migrate to LogEntryAs above.
     """
@@ -233,7 +232,7 @@ class LogEntryAdmin(ReadOnlyModelAdmin):
             '<span class="%s">%s</span>' % (
                 self.link_classes[obj.action_flag],
                 r,
-            )
+            ),
         )
     action.short_description = _("Action, object")
     action.admin_order_field = 'object_repr'
