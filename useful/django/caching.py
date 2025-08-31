@@ -40,11 +40,11 @@ def cached_function(func=None, num_args_to_key=None, timeout=DEFAULT_TIMEOUT):
 
     """
     def cached_function_inner(fn):
-        if getattr(fn, '__defaults__'):
+        if fn.__defaults__:
             raise RuntimeError("cached_function does not allow function to have default args "
                                "in order to keep the number of passed args fixed.")
 
-        if getattr(fn, '__name__') == '<lambda>':
+        if fn.__name__ == '<lambda>':
             raise RuntimeError("cached_function can't work on anonymous funcs in order "
                                "to keep the name unique.")
 
@@ -85,9 +85,8 @@ def cached_function(func=None, num_args_to_key=None, timeout=DEFAULT_TIMEOUT):
         # When used as @cached_function(...)
         return cached_function_inner
 
-    elif callable(func):
+    if callable(func):
         # When used as @cached_function
         return cached_function_inner(func)
 
-    else:
-        raise RuntimeError("Invalid arguments provided to cached_function decorator.")
+    raise RuntimeError("Invalid arguments provided to cached_function decorator.")

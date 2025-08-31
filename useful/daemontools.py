@@ -1,12 +1,11 @@
 import atexit
-import logging.handlers
 import grp
+import logging.handlers
 import os
 import pwd
 import signal
 import sys
 from syslog import LOG_DAEMON
-
 
 # For becoming the daemon, django.utils.daemonize.become_daemon() is used.
 # The additional daemon-stuff utilities follow:
@@ -23,8 +22,8 @@ def drop_privileges(user='nobody', group='nogroup'):
         if group != 'root':
             try:
                 newgid = grp.getgrnam(group).gr_gid
-            except KeyError:
-                raise RuntimeError("System group '%s' not found." % group)
+            except KeyError as exc:
+                raise RuntimeError("System group '%s' not found." % group) from exc
 
             os.setgid(newgid)
             os.setegid(newgid)
@@ -32,8 +31,8 @@ def drop_privileges(user='nobody', group='nogroup'):
         if user != 'root':
             try:
                 newuid = pwd.getpwnam(user).pw_uid
-            except KeyError:
-                raise RuntimeError("System user '%s' not found." % user)
+            except KeyError as exc:
+                raise RuntimeError("System user '%s' not found." % user) from exc
 
             os.setuid(newuid)
             os.seteuid(newuid)
@@ -59,7 +58,7 @@ def install_termination_logging_signal_handlers():
         if s not in (signal.SIGCHLD, signal.SIGURG, signal.SIGWINCH):
             try:
                 signal.signal(s, sig_handler)
-            except:  # noqa
+            except Exception:  # noqa: S110  # pylint: disable=broad-except
                 pass
 
 
@@ -88,7 +87,7 @@ def setup_pidfile(pidfile_path):
         try:
             logging.debug("Removing PID file %s." % pidfile_path_)
             os.unlink(pidfile_path_)
-        except:  # noqa
+        except OSError:
             logging.error("Cannot remove PID file %s." % pidfile_path_)
 
     if os.path.exists(pidfile_path):
@@ -97,4 +96,5 @@ def setup_pidfile(pidfile_path):
         sys.exit(3)
 
     atexit.register(exit_function, pidfile_path)
-    open(pidfile_path, 'w').write('%d\n' % os.getpid())
+    with open(pidfile_path, 'w', encoding='UTF-8') as fp:
+        fp.write('%d\n' % os.getpid())

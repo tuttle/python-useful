@@ -1,0 +1,171 @@
+[build-system]
+requires = ["setuptools>=70", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "useful"
+dynamic = ["version"]
+description = "Everyday utilities for writing Python code or Django projects."
+readme = { file = "README.rst", content-type = "text/x-rst" }
+requires-python = ">=3.10"
+authors = [{ name = "Vlada Macek", email = "macek@sandbox.cz" }]
+license = { file = "LICENSE" }
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: BSD License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Framework :: Django",
+  "Framework :: Django :: 4.2",
+  "Framework :: Django :: 5.2",
+  "Topic :: Software Development :: Libraries",
+]
+
+[project.optional-dependencies]
+django = ["Django>=4.2,<6.0"]
+test = ["pytest>=8.2", "pytest-django>=4.8"]
+dev = ["ruff>=0.5.0", "tox>=4.14", "tox-uv>=1.8", "pylint>=3.2", "pylint-django>=2.6"]
+
+[project.urls]
+Homepage = "https://github.com/tuttle/python-useful"
+"Bug Tracker" = "https://github.com/tuttle/python-useful/issues"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.dynamic]
+version = { attr = "useful.__versionstr__" }
+
+[tool.setuptools.package-data]
+"useful" = ["django/locale/**/LC_MESSAGES/django.*"]
+
+[tool.setuptools.packages.find]
+include = ["useful*"]
+exclude = ["tests*"]
+
+# pytest-django: point tests at your Django settings module.
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "tests.settings"
+addopts = "-ra"
+testpaths = ["tests"]
+# Mirror your previous config:
+django_find_project = false
+
+# Ruff: linter + formatter.
+[tool.ruff]
+target-version = "py310"
+line-length = 120
+src = ["useful", "tests"]
+
+# Ruff will use unstable rules (E303 Too many blank lines, E241 Multiple spaces after comma), fixes, and formatting.
+# After these interesting rules become stable, we can turn the preview mode off.
+preview = true
+
+[tool.ruff.lint]
+
+# ---- 1 The core set ---------------------------------------------------------
+# *Strictly* correctness, parity with stock Flake8, and import sorting
+select = [
+    "F",   # Pyflakes - undefined names, unused vars, etc.  (must-have)
+    "E",   # pycodestyle *errors* (not warnings)
+    "W",   # pycodestyle *warnings* (line-ending whitespace, etc.)
+    "PGH", # pygrep-hooks - A collection of fast, cheap, regex based pre-commit hooks.
+]
+
+# ---- 2 Low-risk “quality” rules --------------------------------------------
+# Things most teams enable on day 1 because fixes are mostly automatic
+extend-select = [
+    "DJ",  # flake8-django - Django specific checks
+    "I",   # isort replacement - deterministic imports
+    "UP",  # pyupgrade - modern syntax / deprecation fixes
+    "B",   # flake8-bugbear - likely bugs & bad patterns
+    "C90", # mccabe complexity - keeps functions honest
+    "N",   # pep8-naming - class_/func_ name consistency
+    "S",   # flake8-bandit - basic security red flags
+    "C4",  # flake8-comprehensions - C-style loops
+    "PERF",  # Perflint - tiny perf wins
+    "PLE", # Pylint (PL) Errors
+]
+
+# ---- 3 Optional but popular for larger orgs ---------------------------------
+# Enable *after* the first green CI, usually one group at a time
+# ANN  → require & check type hints
+# D    → pydocstyle (or DOC) - doc-string conventions
+# PGH  → pre-commit hook helpers
+# …and whatever domain-specific sets you care about (PD, NPY, DJ, AIR, etc.)
+#
+# Example:
+# extend-select = ["ANN", "D", "S", "PERF"]
+
+ignore = [
+    "Q000",   # Single quotes found but double quotes preferred
+    "UP031",  # Use format specifiers instead of percent format
+    "N802",   # Function name should be lowercase
+    "N803",   # Argument name should be lowercase
+    # "E722",   # Do not use bare `except`
+    # "N818",  # Exception name `BadParameter` should be named with an Error suffix
+    # "B904",  # Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None` to distinguish them from errors in exception handling"
+    # "UP031",  # Use format specifiers instead of percent format"
+    # "S605",  # Starting a process with a shell, possible injection detected
+    # "S403",  # `pickle`, `cPickle`, `dill`, and `shelve` modules are possibly insecure
+    # "C408",  # Unnecessary `dict()` call (rewrite as a literal)
+]
+
+[tool.ruff.lint.per-file-ignores]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 15
+
+[tool.ruff.format]
+# Keep defaults; add options if you care (e.g., "quote-style = 'single'")
+
+[tool.pylint.MASTER]
+
+load-plugins = ["pylint_django"]
+# Let pylint-django know which settings to use (same module you use for pytest)
+"django-settings-module" = "tests.settings"
+# Speed up on multicore
+jobs = 0
+ignore = ["__pycache__"]
+
+[tool.pylint.messages_control]
+disable = [
+    "C0103",  # invalid-name: Constant name "..." doesn't conform to UPPER_CASE naming style
+    "C0114",  # missing-module-docstring: Missing module docstring
+    "C0115",  # missing-class-docstring: Missing class docstring
+    "C0116",  # missing-function-docstring: Missing function or method docstring
+    "C0209",  # consider-using-f-string: Consider using an f-string
+    "E0401",  # import-error: Unable to import module
+    "R0902",  # too-many-instance-attributes: Too many instance attributes
+    "R0903",  # too-few-public-methods: Too few public methods
+    "R0912",  # too-many-branches: Too many branches
+    "R0913",  # too-many-arguments: Too many arguments
+    "R0914",  # too-many-locals: Too many local variables
+    "R0915",  # too-many-statements: Too many statements
+    "R0917",  # too-many-positional-arguments: Too many positional arguments
+    "R1702",  # too-many-nested-blocks: Too many nested blocks
+    # "R1707",  # trailing-comma-tuple: Disallow trailing comma tuple
+    # "R1735",  # use-dict-literal: recommends {...} instead of dict(...)
+    # "W0104",  # pointless-statement: Statement seems to have no effect
+    # "W0201",  # attribute-defined-outside-init: Attribute defined outside __init__
+    # "W0511",  # fixme: Used when a warning note as FIXME or XXX is detected
+    # "W0611",  # unused-import: Unused import
+    # "W0612",  # unused-variable: Unused variable
+    # "W0702",  # bare-except: No exception type(s) specified
+    # "W0707",  # raise-missing-from: "Consider explicitly re-raising using 'except ... as exc"
+    # "W0718",  # broad-exception-caught: Catching too general exception
+    # "W1201",  # logging-not-lazy: Use lazy % formatting in logging functions
+    # "W1203",  # logging-fstring-interpolation: Use % formatting in logging functions
+    # "W1514",  # unspecified-encoding: Using open without explicitly specifying an encoding
+]
+
+[tool.pylint.format]
+max-line-length = 120
+
+[tool.pylint.basic]
+good-names = ["i", "j", "k", "n", "pk", "qs"]

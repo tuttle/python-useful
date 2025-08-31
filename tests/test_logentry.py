@@ -1,13 +1,13 @@
 import json
 
-from django import VERSION
 from django.contrib.admin.models import LogEntry
 from django.contrib.auth.models import Group, User
 from django.forms import ModelForm
 from django.http import QueryDict
 from django.test import TestCase
-
 from useful.django.logentry import LogEntryAs
+
+from django import VERSION
 
 
 class GroupModelForm(ModelForm):
@@ -50,7 +50,7 @@ class LogEntryAsTest(TestCase):
         self.assertEqual(LogEntry.objects.count(), 3)
 
         entry1, entry2, entry3 = list(
-            LogEntry.objects.order_by('id')
+            LogEntry.objects.order_by('id'),
         )
 
         # Since Django 3.0 the Admin's model history change messages
@@ -64,8 +64,8 @@ class LogEntryAsTest(TestCase):
         self.assertEqual(
             entry1.change_message,
             json.dumps(
-                [{'ui': True}]
-            )
+                [{'ui': True}],
+            ),
         )
         self.assertEqual(str(entry1), 'Added %s.' % s_quote("group1"))
         self.assertEqual(
@@ -82,12 +82,12 @@ class LogEntryAsTest(TestCase):
         self.assertEqual(
             entry2.change_message,
             json.dumps(
-                [{'ui': True}, {'changed': {'fields': [field_desc]}}]
-            )
+                [{'ui': True}, {'changed': {'fields': [field_desc]}}],
+            ),
         )
         self.assertEqual(
             str(entry2),
-            'Changed %s %s Changed %s.' % (s_quote("group2"), dash, field_desc)
+            'Changed %s %s Changed %s.' % (s_quote("group2"), dash, field_desc),
         )
         self.assertEqual(
             entry2.get_change_message(),
@@ -103,8 +103,8 @@ class LogEntryAsTest(TestCase):
         self.assertEqual(
             entry3.change_message,
             json.dumps(
-                [{'ui': True}]
-            )
+                [{'ui': True}],
+            ),
         )
         # Django bug https://code.djangoproject.com/ticket/32136
         self.assertEqual(str(entry3), 'Deleted %s' % s_quote("group2."))

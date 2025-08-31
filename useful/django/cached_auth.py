@@ -106,10 +106,12 @@ class CachedAuthenticationMiddleware(AuthenticationMiddleware):
         super().__init__(*args, **kwargs)
 
     def process_request(self, request):
-        assert hasattr(request, 'session'), \
-            "The Django authentication middleware requires session middleware to be installed. "\
-            "Edit your MIDDLEWARE_CLASSES setting to insert 'django.contrib.sessions.middleware.SessionMiddleware'."
+        if not hasattr(request, 'session'):
+            raise RuntimeError(
+                "The Django authentication middleware requires session middleware to be installed. "
+                "Edit your MIDDLEWARE_CLASSES setting to insert 'django.contrib.sessions.middleware.SessionMiddleware'."
+            )
 
         request.user = SimpleLazyObject(
-            lambda: get_cached_user(request)
+            lambda: get_cached_user(request),
         )

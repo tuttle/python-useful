@@ -1,8 +1,9 @@
 from collections import defaultdict
 
-from django.db import connection
 from django.db.models.manager import Manager
 from django.db.models.query import QuerySet
+
+from django.db import connection
 
 
 def _get_queryset(klass):
@@ -69,17 +70,17 @@ def prefetch_m2m(m2m_field):
           {{ groups_m2m|get:user.id|default_if_none:""|join:", " }}
     """
     f = m2m_field.field
-    tgt_objs = dict(
-        (o.pk, o) for o in f.related_model.objects.iterator()
-    )
+    tgt_objs = {
+        o.pk: o for o in f.related_model.objects.iterator()
+    }
 
     cursor = connection.cursor()
     cursor.execute(
         "SELECT %s, %s FROM %s" % (
             f.m2m_column_name(),
             f.m2m_reverse_name(),
-            f.m2m_db_table()
-        )
+            f.m2m_db_table(),
+        ),
     )
 
     lookup = defaultdict(list)
@@ -102,10 +103,9 @@ def get_values_map(klass, by, *fields):
     iterator = queryset.values_list(by, *fields).order_by().iterator()
 
     if len(fields) > 1:
-        return dict((tup[0], tup[1:]) for tup in iterator)
+        return {tup[0]: tup[1:] for tup in iterator}
 
-    elif len(fields) == 1:
+    if len(fields) == 1:
         return dict(iterator)
 
-    else:
-        return set(queryset.values_list(by, flat=True).distinct().order_by().iterator())
+    return set(queryset.values_list(by, flat=True).distinct().order_by().iterator())

@@ -25,6 +25,6 @@ class CachedFunctionTest(TestCase):
     def test_bytestring(self):
         b_text = b'\xc4\xbe\xc5\xa1\xc4\x8d\xc5\xa5\xc5\xbe\xc3\xbd\xc3\xa1\xc3\xad\xc3\xa9' * 10
         result = expensive_function(
-            b_text, b_text.decode('utf-8')
+            b_text, b_text.decode('utf-8'),
         )
         self.assertEqual(result, 2)

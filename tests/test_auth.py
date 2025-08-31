@@ -9,7 +9,7 @@ class EmailLoginModelBackendTest(TestCase):
     def test_authenticates_using_email(self):
         user = User(
             username='foobar',
-            email='foo@bar.baz'
+            email='foo@bar.baz',
         )
         user.set_password('qwerty321')
         user.save()
@@ -27,7 +27,7 @@ class UsernameOrEmailLoginModelBackendTest(TestCase):
     def test_authenticates_using_email(self):
         user = User(
             username='foobar',
-            email='foo@bar.baz'
+            email='foo@bar.baz',
         )
         user.set_password('qwerty321')
         user.save()

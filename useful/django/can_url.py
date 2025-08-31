@@ -4,12 +4,11 @@ from django.core.exceptions import PermissionDenied
 from django.urls import NoReverseMatch, URLResolver, get_callable, get_resolver
 from django.urls.base import get_urlconf
 
-
 # This module requires that you use useful.django.urlpatterns.UrlPatterns
 # to decorate your views.
 
 
-@lru_cache()
+@lru_cache
 def get_all_callbacks(urlconf):
     """
     Gets the dict translating the view names to view callables for the entire
@@ -68,7 +67,7 @@ def can_url(user, view):
         return False
 
 
-class CanUrl(object):
+class CanUrl:
     """
     Helper wrapper for can_url in templates. Allows for short and readable
     testing, whether the given view is accessible by the current user.

@@ -28,7 +28,7 @@ class ReadOnlyModelAdmin(admin.ModelAdmin):
     # Allow viewing objects but not actually changing them.
     def has_change_permission(self, request, obj=None):
         if request.method in ('GET', 'HEAD'):
-            return super(ReadOnlyModelAdmin, self).has_change_permission(request, obj)
+            return super().has_change_permission(request, obj)
         return False
 
     def save_model(self, request, obj, form, change):  # MUST NOT CHANGE THE VAR NAME

@@ -2,7 +2,7 @@ from django.utils.crypto import constant_time_compare, salted_hmac
 from django.utils.encoding import smart_str
 
 
-class SecretTokenGenerator(object):
+class SecretTokenGenerator:
     """
     Utility for protecting the strings (usually) against unauthorized change.
     First call make_token on the protectable and send the result token to

@@ -8,7 +8,7 @@ def first(predicate_or_None, iterable, default=None):
     """
     return next(
         filter(predicate_or_None, iterable),
-        default
+        default,
     )
 
 

@@ -10,5 +10,5 @@ class PageDecoratorTest(TestCase):
         )
         self.assertTemplateUsed(
             response,
-            'simple_template.html'
+            'simple_template.html',
         )

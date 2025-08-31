@@ -2,7 +2,7 @@ import bisect
 import hashlib
 
 
-class ConsistentHashRing(object):
+class ConsistentHashRing:
     """
     Spread the keys into a fixed set of buckets as uniformly as possible.
     Also maintain consistency so only a few keys change their assignment when the set of buckets change.
@@ -25,12 +25,12 @@ class ConsistentHashRing(object):
         else:
             key_bytestring = key
 
-        return int(hashlib.md5(key_bytestring).hexdigest(), 16)
+        return int(hashlib.md5(key_bytestring).hexdigest(), 16)  # noqa: S324
 
     def ireplicas(self, bucket):
         for r in range(self.replicas):
             yield self.hash(
-                '%s:%d' % (bucket, r)
+                '%s:%d' % (bucket, r),
             )
 
     def add_bucket(self, bucket):
@@ -56,7 +56,7 @@ class ConsistentHashRing(object):
         If the hash of the given key is greater than the greatest hash, returns the lowest hashed bucket.
         """
         h = self.hash(
-            str(key)
+            str(key),
         )
         start = bisect.bisect(self.keys, h)
 
@@ -96,7 +96,7 @@ def demo():
         cnt,
         '\t%.1f%% of keys change its bucket' % (
             100 * cnt[1] / sum(cnt),
-        )
+        ),
     )
 
     print()
@@ -110,7 +110,7 @@ def demo():
                 '*' * (v1 // 5),
                 v2,
                 '*' * (v2 // 5),
-            )
+            ),
         )
 
 
